@@ -1,0 +1,30 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="TrackMe.Theme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="actionModeBackground">@android:color/transparent</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_action_back</item>
+        <item name="actionModeCloseButtonStyle">@style/TrackMe.Widget.ActionButton.Close</item>
+        <item name="android:textColorPrimary">@color/primaryTextColor</item>
+        <item name="dialogTheme">@style/TrackMe.Theme.MaterialDialog</item>
+
+        <item name="toolbarStyle">@style/TrackMe.Theme.Toolbar</item>
+    </style>
+
+    <style name="TrackMe.Theme.MaterialDialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:background">@null</item>
+        <item name="windowMinWidthMinor">@fraction/dialog_min_width_minor</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="TrackMe.Theme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="TrackMe.Theme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="TrackMe.Theme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>

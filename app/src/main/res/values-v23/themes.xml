@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TrackMe.Theme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryDarkColor</item>
+        <item name="actionModeBackground">@android:color/transparent</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_action_back</item>
+        <item name="actionModeCloseButtonStyle">@style/TrackMe.Widget.ActionButton.Close</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowMinWidthMajor">55%</item>
+        <item name="android:windowMinWidthMinor">100%</item>
+        <item name="android:textColorPrimary">@color/primaryTextColor</item>
+    </style>
+</resources>

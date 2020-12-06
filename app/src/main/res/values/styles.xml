@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TrackMe.Widget.ActionButton.Close" parent="Widget.AppCompat.Light.ActionButton.CloseMode">
+        <item name="android:tint">@color/colorDrawableTint</item>
+    </style>
+
+    <style name="TrackMe.Theme.Toolbar" parent="@style/Widget.AppCompat.Toolbar">
+        <item name="android:colorBackground">#30000000</item>
+    </style>
+
+</resources>
