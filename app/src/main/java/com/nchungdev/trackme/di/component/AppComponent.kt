@@ -2,7 +2,9 @@ package com.nchungdev.trackme.di.component
 
 import android.content.Context
 import com.nchungdev.data.di.DbModule
-import com.nchungdev.domain.usecase.RequestLocationUpdatesUseCase
+import com.nchungdev.domain.usecase.location.GetLastLocationUseCase
+import com.nchungdev.domain.usecase.location.RequestLocationUpdatesUseCase
+import com.nchungdev.domain.usecase.session.ControlSessionUpdatesUseCase
 import com.nchungdev.domain.usecase.session.*
 import com.nchungdev.trackme.di.module.AppModule
 import com.nchungdev.trackme.di.module.CoroutinesModule
@@ -36,9 +38,11 @@ interface AppComponent {
     // use case
     fun trackingLocationUseCase(): GetLatestSessionUseCase
     fun saveSessionUseCase(): SaveSessionUseCase
-    fun cancelSessionUseCase(): CancelSessionUseCase
-    fun requestLocationUpdatesUseCase(): RequestLocationUpdatesUseCase
+    fun cancelSessionUseCase(): DeleteSessionUseCase
+    fun controlSessionUpdatesUseCase(): ControlSessionUpdatesUseCase
     fun updateSessionUseCase(): UpdateSessionUseCase
     fun createSessionUseCase(): CreateSessionUseCase
     fun getLatestSessionAsynUseCase(): GetLatestSessionAsyncUseCase
+    fun getCurrentLocationUseCase(): GetLastLocationUseCase
+    fun requestLocationUpdatesUseCase(): RequestLocationUpdatesUseCase
 }

@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 interface StopWatch {
+    fun init(timeInMillis: Long)
+
     fun getFormattedTime(): CharSequence
 
     fun getTimeIn(timeUnit: TimeUnit): Long
@@ -27,7 +29,8 @@ interface TimerTickListener {
     fun onTick(time: CharSequence)
 }
 
-class StopWatchImpl @Inject constructor(private val timerTickListener: TimerTickListener) : StopWatch {
+class StopWatchImpl @Inject constructor(private val timerTickListener: TimerTickListener) :
+    StopWatch {
 
     // Current time of stopwatch (in millis)
     private var currentTime: Long = 0
@@ -44,6 +47,10 @@ class StopWatchImpl @Inject constructor(private val timerTickListener: TimerTick
                 handler?.postDelayed(this, 1000)
             }
         }
+    }
+
+    override fun init(timeInMillis: Long) {
+        currentTime = timeInMillis
     }
 
     override fun getFormattedTime() = TimeUtils.getFormattedStopWatchTime(currentTime)

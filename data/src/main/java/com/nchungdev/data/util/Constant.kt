@@ -6,5 +6,5 @@ object Constant {
     const val LOCATION_REQUEST_FASTEST_INTERVAL = 5000L
 
     const val TIMER_TICK_ACTION = "com.nchungdev.ACTION_TIMER_TICK_ACTION"
-
+    const val EXTRA_TIMER_TICK = "xTimeTick"
 }

@@ -1,4 +1,4 @@
-package com.nchungdev.data.model
+package com.nchungdev.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -15,8 +15,8 @@ data class SessionEntity(
     var distanceInKm: Float = 0f,
     var speedInKmph: Float = 0f,
     var timeInMillis: Long = 0L,
-    var isCompleted: Boolean = false,
-    var timestamp: Long = Calendar.getInstance().timeInMillis
+    var state: Int = SessionState.READY,
+    var timestamp: Long = Calendar.getInstance().timeInMillis,
 ) {
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null

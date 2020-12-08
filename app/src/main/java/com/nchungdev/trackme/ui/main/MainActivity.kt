@@ -3,8 +3,10 @@ package com.nchungdev.trackme.ui.main
 import android.content.Intent
 import android.os.Bundle
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.ActivityMainBinding
@@ -26,13 +28,12 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>() {
     override fun initViewBinding() = ActivityMainBinding.inflate(layoutInflater)
 
     override fun inits(binding: ActivityMainBinding, savedInstanceState: Bundle?) {
+        subscribeToObservers(binding)
         if (isMyServiceRunning(LocationService::class.java)) {
-            viewModel.onOpenTrackingScreen(true)
+            viewModel.onRestoreTracking()
         } else {
             viewModel.onReceiveIntent(intent)
         }
-        setupNavigation(binding)
-        subscribeToObservers()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -42,7 +43,8 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>() {
 
     private fun setupNavigation(binding: ActivityMainBinding) {
         val navController = supportFragmentManager.findNavHostFragment(R.id.nav_host_fragment)
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.homeFragment, R.id.recordFragment, R.id.aboutFragment))
+        val appBarConfiguration =
+            AppBarConfiguration(setOf(R.id.homeFragment, R.id.recordFragment, R.id.aboutFragment))
         setSupportActionBar(binding.toolbar)
         setupActionBarWithNavController(this, navController, appBarConfiguration)
 
@@ -57,18 +59,24 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>() {
             }
         }
         binding.fab.setOnClickListener {
-            viewModel.onOpenTrackingScreen(false)
+            viewModel.onOpenTrackingScreen()
         }
     }
 
-    private fun subscribeToObservers() {
+    private fun subscribeToObservers(binding: ActivityMainBinding) {
         val navController = supportFragmentManager.findNavHostFragment(R.id.nav_host_fragment)
         viewModel.navigation.observe(this) {
-            when (it.event) {
+            when (it.name) {
                 HOME -> navController.navigate(R.id.homeFragment)
-                TRACKING -> Navigator.openTrackingActivity(this, it.isResumed)
                 ABOUT -> navController.navigate(R.id.aboutFragment)
+                TRACKING -> {
+                    val sessionModel = if (it.data is SessionModel) it.data else null
+                    Navigator.openTrackingActivity(this, sessionModel)
+                }
                 else -> Unit
+            }
+            if (it.name != TRACKING) {
+                setupNavigation(binding)
             }
         }
     }

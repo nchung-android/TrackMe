@@ -14,5 +14,5 @@ data class SessionModel(
     var avgSpeedInKmph: Float = 0f,
     var distanceInKm: Float = 0f,
     var timeInMillis: Long = 0L,
-    var isCompleted: Boolean = false
+    var state: Int = 0,
 ) : Parcelable

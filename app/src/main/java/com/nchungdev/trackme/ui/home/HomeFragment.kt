@@ -88,15 +88,11 @@ class HomeFragment : BaseVBFragment<HomeViewModel, FragmentHomeBinding>() {
             outRect.left = spacing
             outRect.right = spacing
             val adapterPosition = parent.findContainingViewHolder(view)?.adapterPosition
-            if (adapterPosition == 0) {
-                outRect.top = spacing
-            } else {
-                outRect.top = spacingSmall
-            }
+            if (adapterPosition == 0) outRect.top = spacing
+            else outRect.top = spacingSmall
             val count = parent.adapter?.itemCount ?: return
-            if (adapterPosition == count - 1) {
-                outRect.bottom = spacing
-            }
+            if (adapterPosition == count - 1) outRect.bottom = spacing
+            else outRect.bottom = spacingSmall
         }
     }
 }

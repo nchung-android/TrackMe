@@ -9,12 +9,13 @@ import com.nchungdev.domain.usecase.base.UseCase
 import com.nchungdev.domain.usecase.session.GetLatestSessionAsyncUseCase
 import com.nchungdev.domain.util.Result
 import com.nchungdev.trackme.ui.base.event.Event
+import com.nchungdev.trackme.ui.base.event.Screen
 import com.nchungdev.trackme.ui.util.Constants
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
-    private val getLatestSessionAsyncUseCase: GetLatestSessionAsyncUseCase
+    private val getLatestSessionAsyncUseCase: GetLatestSessionAsyncUseCase,
 ) : ViewModel() {
 
     private val _navigation = MutableLiveData<Screen>()
@@ -23,14 +24,11 @@ class MainViewModel @Inject constructor(
 
     fun onReceiveIntent(intent: Intent?) {
         if (intent?.action == Constants.ACTION_SHOW_TRACKING_FRAGMENT) {
-            _navigation.value = Screen(Event.TRACKING, true)
+            _navigation.value = Screen(Event.TRACKING)
         } else {
             viewModelScope.launch {
                 when (val result = getLatestSessionAsyncUseCase(UseCase.NoParams)) {
-                    is Result.Success ->
-                        if (result.data != null) {
-                            _navigation.value = Screen(Event.TRACKING)
-                        }
+                    is Result.Success -> _navigation.value = Screen(Event.TRACKING, result.data)
                     else -> _navigation.value = Screen(Event.HOME)
                 }
             }
@@ -41,13 +39,20 @@ class MainViewModel @Inject constructor(
         _navigation.value = Screen(Event.HOME)
     }
 
-    fun onOpenTrackingScreen(isResumed: Boolean) {
-        _navigation.value = Screen(Event.TRACKING, isResumed)
+    fun onOpenTrackingScreen() {
+        _navigation.value = Screen(Event.TRACKING)
     }
 
     fun onOpenAboutScreen() {
         _navigation.value = Screen(Event.ABOUT)
     }
 
-    class Screen(val event: Event, val isResumed: Boolean = false)
+    fun onRestoreTracking() {
+        viewModelScope.launch {
+            when (val result = getLatestSessionAsyncUseCase(UseCase.NoParams)) {
+                is Result.Success -> _navigation.value = Screen(Event.TRACKING, result.data)
+                else -> _navigation.value = Screen(Event.HOME)
+            }
+        }
+    }
 }

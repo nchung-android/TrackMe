@@ -15,7 +15,7 @@ abstract class SimpleActivity<F : BaseFragment> : BaseActivity() {
     override fun inflateLayout(savedInstanceState: Bundle?) {
         val binding = ActivitySimpleBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initToolbar(binding.toolbar)
+        initToolbar(binding.toolbar.toolbar)
         inits(savedInstanceState)
     }
 

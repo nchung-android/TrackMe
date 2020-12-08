@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.nchungdev.data.db.mapper.toLatLng
 import com.nchungdev.data.util.Constant
+import com.nchungdev.data.util.TimeUtils
 import com.nchungdev.domain.model.LocationModel
 import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.domain.util.Result
@@ -33,6 +34,7 @@ import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
 import com.nchungdev.trackme.ui.helper.*
 import com.nchungdev.trackme.ui.util.Constants
 import com.nchungdev.trackme.ui.util.PermissionUtils
+import com.nchungdev.trackme.ui.util.isMyServiceRunning
 import kotlinx.coroutines.*
 
 
@@ -53,6 +55,8 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
             .color(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             .width(resources.getDimension(R.dimen.polyline_width))
     }
+    private var binding: FragmentTrackingBinding? = null
+
     private var polylineHelper: PolylineHelper? = null
 
     private val stopWatchReceiver = object : BroadcastReceiver() {
@@ -70,14 +74,28 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
     override fun initViewBinding(view: View) = FragmentTrackingBinding.bind(view)
 
     override fun inits(binding: FragmentTrackingBinding, savedInstanceState: Bundle?) {
+        this.binding = binding
         mapView = binding.mapView
         binding.btnTracking.setOnClickListener(this)
         binding.btnStop.setOnClickListener(this)
         lifecycle.addObserver(MapViewLifecycleManager(mapView, savedInstanceState))
-        subscribeToObservers(binding)
+        subscribeToObservers()
         requestLocationPermissions()
         mapView.getMapAsync(this)
-        viewModel.onInit(arguments)
+        viewModel.onInit(arguments,
+            context?.isMyServiceRunning(LocationService::class.java) == true)
+    }
+
+    override fun onStop() {
+        unregisterReceiver(stopWatchReceiver)
+        super.onStop()
+    }
+
+    override fun onStart() {
+        if (viewModel.trackingState.value == TrackingState.START) {
+            registerReceiver(stopWatchReceiver, IntentFilter(Constant.TIMER_TICK_ACTION))
+        }
+        super.onStart()
     }
 
     override fun onLowMemory() {
@@ -115,6 +133,20 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
             MapConfig(map ?: return)
             polylineHelper = PolylineHelper(map ?: return, polylineOptions)
             polylineHelper?.addAllPolylines(pathPoints)
+            viewModel.currentLocation.observe(viewLifecycleOwner) {
+                when (it) {
+                    is Result.Success -> {
+                        map?.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                it.data.toLatLng(),
+                                Constants.MAP_ZOOM
+                            )
+                        )
+                    }
+                    is Result.Error -> Unit
+                    Result.Loading -> Unit
+                }
+            }
         }
     }
 
@@ -139,14 +171,15 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         }
     }
 
-    private fun subscribeToObservers(binding: FragmentTrackingBinding) {
+    private fun subscribeToObservers() {
+        val binding = binding ?: return
         viewModel.session.observe(viewLifecycleOwner) {
             when (it) {
                 is Result.Success -> {
                     when (viewModel.trackingState.value) {
-                        TrackingState.ON_CREATE -> onTrackingReady(it.data)
-                        TrackingState.ON_RESUME,
-                        TrackingState.ON_START -> onTracking(binding, it.data)
+                        TrackingState.READY -> onTrackingReady(it.data)
+                        TrackingState.START -> onTracking(it.data)
+                        else -> showSessionData(it.data)
                     }
                 }
                 is Result.Error -> Unit
@@ -158,30 +191,33 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         }
         viewModel.trackingState.observe(viewLifecycleOwner) {
             when (it) {
-                TrackingState.ON_CREATE -> {
+                TrackingState.READY -> {
                     binding.btnTracking.setImageResource(R.drawable.ic_record)
                     binding.btnStop.isVisible = false
                     onTrackingReady(viewModel.session.value?.data ?: return@observe)
+                    viewModel.onStartRequestLocationUpdates()
                 }
-                TrackingState.ON_RESUME,
-                TrackingState.ON_START -> {
+                TrackingState.START -> {
                     binding.btnTracking.setImageResource(R.drawable.ic_pause)
                     binding.btnStop.isVisible = false
                     sendCommandToService(Constants.ACTION_START_SERVICE)
                     registerReceiver(stopWatchReceiver, IntentFilter(Constant.TIMER_TICK_ACTION))
+                    viewModel.onStopRequestLocationUpdates()
                 }
-                TrackingState.ON_PAUSE -> {
+                TrackingState.PAUSE -> {
                     binding.btnTracking.setImageResource(R.drawable.ic_stop)
                     binding.btnStop.isVisible = true
                     sendCommandToService(Constants.ACTION_PAUSE_SERVICE)
-                    unregisterReceiver(stopWatchReceiver)
+                    viewModel.onStartRequestLocationUpdates()
                 }
-                TrackingState.ON_STOP -> {
+                TrackingState.FINISH -> {
                     binding.btnTracking.setImageResource(R.drawable.ic_play)
                     binding.btnStop.isVisible = true
                     sendCommandToService(Constants.ACTION_STOP_SERVICE)
                     unregisterReceiver(stopWatchReceiver)
+                    viewModel.onStopRequestLocationUpdates()
                 }
+                else -> Unit
             }
         }
         viewModel.action.observe(viewLifecycleOwner) {
@@ -214,27 +250,28 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         }
     }
 
+    private fun showSessionData(session: SessionModel) {
+        pathPoints = session.polylines.toMutableList()
+        polylineHelper?.addLatestPolyline(pathPoints.last())
+        val startLocation = session.startLocation.toLatLng()
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, Constants.MAP_ZOOM))
+        val binding = binding ?: return
+        binding.tvTotalTime.text = TimeUtils.getFormattedStopWatchTime(session.timeInMillis)
+        binding.tvDistance.text = getString(R.string.distance_km_unit, session.distanceInKm)
+        binding.tvSpeed.text = getString(R.string.speed_kmh_unit, session.speedInKmph)
+    }
+
     private fun onTrackingReady(data: SessionModel) {
         val startLocation = data.startLocation.toLatLng()
         map?.addMarker(MarkerOptions().position(startLocation))
         map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, Constants.MAP_ZOOM))
     }
 
-    private fun onTracking(binding: FragmentTrackingBinding, data: SessionModel) {
-        binding.tvDistance.text = getString(R.string.distance_km_unit, data.distanceInKm)
-        binding.tvSpeed.text = getString(R.string.speed_kmh_unit, data.speedInKmph)
+    private fun onTracking(data: SessionModel) {
+        showSessionData(data)
         pathPoints = data.polylines.toMutableList()
         polylineHelper?.addLatestPolyline(pathPoints.last())
-        if (viewModel.trackingState.value == TrackingState.ON_RESUME) {
-            map?.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    data.startLocation.toLatLng(),
-                    Constants.MAP_ZOOM
-                )
-            )
-        } else {
-            moveCameraToUser()
-        }
+        moveCameraToUser()
     }
 
     private fun moveCameraToUser() {
@@ -257,8 +294,10 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
     }
 
     companion object {
-        fun newInstance(isResume: Boolean) = TrackingFragment().apply {
-            arguments = bundleOf("isResume" to isResume)
+        const val EXTRA_SESSION = "xSession"
+
+        fun newInstance(sessionModel: SessionModel?) = TrackingFragment().apply {
+            arguments = bundleOf(EXTRA_SESSION to sessionModel)
         }
     }
 }
