@@ -14,6 +14,7 @@ import com.nchungdev.data.util.Util
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.ui.main.MainActivity
 import com.nchungdev.trackme.ui.tracking.TrackingActivity
+import com.nchungdev.trackme.ui.tracking.TrackingFragment
 
 
 object NotificationUtil {
@@ -26,7 +27,9 @@ object NotificationUtil {
         val stackBuilder = TaskStackBuilder.create(context)
         stackBuilder.addParentStack(MainActivity::class.java)
         stackBuilder.addNextIntent(intent)
-        stackBuilder.addNextIntent(Intent(context, TrackingActivity::class.java))
+        val intent1 = Intent(context, TrackingActivity::class.java)
+        intent1.putExtra(TrackingFragment.EXTRA_OPEN_FROM_NOTIF, true)
+        stackBuilder.addNextIntent(intent1)
         return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 

@@ -1,6 +1,7 @@
 package com.nchungdev.trackme.ui.tracking
 
 import android.graphics.Bitmap
+import android.os.Bundle
 import androidx.lifecycle.*
 import com.nchungdev.data.entity.SessionState
 import com.nchungdev.domain.model.LocationModel
@@ -40,28 +41,31 @@ class TrackingViewModel @Inject constructor(
 
     val event: LiveData<Event> = _event
 
-    private var isFirstRun = true
+    private var shouldRestore = false
 
-    fun onInit() {
-        isFirstRun = true
+    fun onInit(data: Bundle?) {
+        val isFromNotif = data?.getBoolean(TrackingFragment.EXTRA_OPEN_FROM_NOTIF, false)
+        val isFromNewIntent = data?.getBoolean(TrackingFragment.EXTRA_OPEN_FROM_SPLASH, false)
+        shouldRestore = isFromNotif == true || isFromNewIntent == true
     }
 
     fun onLocationPermissionGranted() {
-        _trackingState.postValue(TrackingState.START)
+        _trackingState.value = TrackingState.START
         _currentLocation.addSource(getLastLocationUseCase(UseCase.NoParams)) {
             if (trackingState.value != TrackingState.RUNNING) {
                 _currentLocation.postValue(it)
             }
         }
+        _currentLocation.postValue(Result.Success(LocationModel(10.768484668348659, 106.66023725668128)))
         _session.addSource(getLatestSessionUseCase(UseCase.NoParams)) {
-            if (isFirstRun && it is Result.Success) {
+            if (shouldRestore && it is Result.Success) {
                 if (it.data.state == SessionState.RUNNING) {
                     _trackingState.postValue(TrackingState.RUNNING)
                 } else {
                     _trackingState.postValue(TrackingState.PAUSE)
                 }
                 _session.postValue(it)
-                isFirstRun = false
+                shouldRestore = false
             } else if (trackingState.value == TrackingState.RUNNING) {
                 _session.postValue(it)
             }

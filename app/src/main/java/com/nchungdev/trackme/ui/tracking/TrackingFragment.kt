@@ -34,8 +34,6 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
     OnMapReadyCallback,
     View.OnClickListener {
 
-    private var currentZoomLevel: Float = MapConfig.DEFAULT_ZOOM
-
     // init views
     private lateinit var mapView: MapView
 
@@ -68,8 +66,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         setDefaultData()
         subscribeToObservers()
         requestLocationPermissions()
-        mapView.getMapAsync(this)
-        viewModel.onInit()
+        viewModel.onInit(arguments)
     }
 
     private fun setDefaultData() {
@@ -111,29 +108,32 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
 
     override fun onMapReady(googleMap: GoogleMap?) {
         map = googleMap
-        if (isLocationPermissionGranted()) {
-            MapConfig(map ?: return)
-            polylineHelper = PolylineHelper(map ?: return, polylineOptions)
-            polylineHelper?.addAllPolylines(pathPoints)
-            viewModel.currentLocation.observe(viewLifecycleOwner) {
-                when (it) {
-                    is Result.Success -> {
-                        map?.moveCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                it.data.toLatLng(),
-                                MapConfig.DEFAULT_ZOOM
-                            )
+        MapConfig(map ?: return)
+        polylineHelper = PolylineHelper(map ?: return, polylineOptions)
+        polylineHelper?.addAllPolylines(pathPoints)
+        viewModel.currentLocation.observe(viewLifecycleOwner) {
+            when (it) {
+                is Result.Success -> {
+                    map?.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            it.data.toLatLng(),
+                            MapConfig.DEFAULT_ZOOM
                         )
-                    }
-                    is Result.Error -> Unit
-                    Result.Loading -> Unit
+                    )
                 }
+                is Result.Error -> Unit
+                Result.Loading -> Unit
             }
         }
     }
 
+    private fun setupMapView() {
+        mapView.getMapAsync(this)
+    }
+
     private fun requestLocationPermissions() {
         if (PermissionUtils.isLocationPermissionGranted(requireContext())) {
+            setupMapView()
             viewModel.onLocationPermissionGranted()
         } else {
             PermissionUtils.requestLocationPermissions(
@@ -146,6 +146,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                         showDialog: Boolean,
                     ) {
                         if (grantResults.isNotEmpty() && grantResults.first() == PermissionChecker.PERMISSION_GRANTED) {
+                            setupMapView()
                             viewModel.onLocationPermissionGranted()
                         } else {
                             showSnackBar()
@@ -283,5 +284,10 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
 
     override fun onBackPressed(): Boolean {
         return viewModel.onBackPressed() || super.onBackPressed()
+    }
+
+    companion object {
+        const val EXTRA_OPEN_FROM_NOTIF = "xOpenFromNotif"
+        const val EXTRA_OPEN_FROM_SPLASH = "xOpenFromSplashScreen"
     }
 }

@@ -40,7 +40,7 @@ class SplashActivity : BaseVBActivity<SplashViewModel, ActivitySplashBinding>() 
                     finish()
                 }
                 Event.TRACKING -> {
-                    Navigator.openTrackingActivity(this)
+                    Navigator.openTrackingActivity(this, true)
                     overridePendingTransition(0, 0)
                     finish()
                 }
