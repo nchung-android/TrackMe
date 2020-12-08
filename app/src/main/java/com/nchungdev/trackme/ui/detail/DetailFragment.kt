@@ -17,11 +17,13 @@ import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.FragmentDetailBinding
 import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
+import com.nchungdev.trackme.ui.helper.MapConfig
 import com.nchungdev.trackme.ui.helper.MapViewLifecycleManager
 import com.nchungdev.trackme.ui.helper.PolylineHelper
 import com.nchungdev.trackme.ui.util.Constants
 
-class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(), OnMapReadyCallback {
+class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(),
+    OnMapReadyCallback {
     private lateinit var mapView: MapView
     private var map: GoogleMap? = null
 
@@ -48,12 +50,21 @@ class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(),
         super.inits(binding, savedInstanceState)
         mapView = binding.mapView
         lifecycle.addObserver(MapViewLifecycleManager(binding.mapView, savedInstanceState))
+        mapView.getMapAsync(this)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap?) {
+        val map = googleMap ?: return
+        MapConfig(map)
+        polylineHelper = PolylineHelper(map, polylineOptions)
+        polylineHelper?.addAllPolylines(pathPoints)
+        this.map = map
         viewModel.onReceiveIntent(arguments)
         viewModel.session.observe(viewLifecycleOwner) {
             if (it != null) {
                 val startLocation = it.startLocation.toLatLng()
-                map?.addMarker(MarkerOptions().position(startLocation))
-                map?.moveCamera(
+                map.addMarker(MarkerOptions().position(startLocation))
+                map.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         startLocation,
                         Constants.MAP_ZOOM
@@ -61,22 +72,20 @@ class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(),
                 )
                 pathPoints = it.polylines.toMutableList()
                 polylineHelper?.addLatestPolyline(pathPoints.last())
-                map?.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        it.startLocation.toLatLng(),
-                        Constants.MAP_ZOOM
-                    )
-                )
+                moveCameraToUser()
             }
         }
-        mapView.getMapAsync(this)
     }
 
-    override fun onMapReady(googleMap: GoogleMap?) {
-        val map = googleMap ?: return
-        polylineHelper = PolylineHelper(map, polylineOptions)
-        polylineHelper?.addAllPolylines(pathPoints)
-        this.map = map
+    private fun moveCameraToUser() {
+        if (pathPoints.isNotEmpty() && pathPoints.last().isNotEmpty()) {
+            map?.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    pathPoints.last().last().toLatLng(),
+                    Constants.MAP_ZOOM
+                )
+            )
+        }
     }
 
 

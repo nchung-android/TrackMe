@@ -6,12 +6,13 @@ import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.trackme.ui.detail.DetailActivity
 import com.nchungdev.trackme.ui.detail.DetailFragment.Companion.EXTRA_SESSION
 import com.nchungdev.trackme.ui.tracking.TrackingActivity
+import com.nchungdev.trackme.ui.tracking.TrackingFragment
 
 object Navigator {
 
-    fun openTrackingActivity(context: Context, isResume: Boolean) {
+    fun openTrackingActivity(context: Context, sessionModel: SessionModel? = null) {
         context.startActivity(Intent(context, TrackingActivity::class.java).apply {
-            putExtra("isResume", isResume)
+            putExtra(TrackingFragment.EXTRA_SESSION, sessionModel)
         })
     }
 

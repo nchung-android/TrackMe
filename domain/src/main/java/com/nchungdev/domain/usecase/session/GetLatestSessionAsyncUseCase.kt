@@ -9,10 +9,9 @@ import javax.inject.Inject
 
 class GetLatestSessionAsyncUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
-    @IoDispatcher coroutineDispatcher: CoroutineDispatcher
-) : UseCase<UseCase.NoParams, SessionModel?>(coroutineDispatcher) {
+    @IoDispatcher coroutineDispatcher: CoroutineDispatcher,
+) : UseCase<UseCase.NoParams, SessionModel>(coroutineDispatcher) {
 
-    override suspend fun execute(parameters: NoParams): SessionModel? {
-        return sessionRepository.getLatestSessionAsync()
-    }
+    override suspend fun execute(parameters: NoParams) =
+        sessionRepository.getLatestSessionAsync() ?: throw Exception()
 }

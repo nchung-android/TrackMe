@@ -5,3 +5,5 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class LocationModel(val latitude: Double = 0.0, val longitude: Double = 0.0) : Parcelable
+
+typealias Polyline = MutableList<LocationModel>

@@ -1,6 +1,6 @@
 package com.nchungdev.data.db.mapper
 
-import com.nchungdev.data.model.SessionEntity
+import com.nchungdev.data.entity.SessionEntity
 import com.nchungdev.domain.model.SessionModel
 import javax.inject.Inject
 
@@ -16,7 +16,7 @@ class SessionMapper @Inject constructor() : Mapper<SessionEntity, SessionModel> 
         avgSpeedInKmph = input.avgSpeedInKmph,
         distanceInKm = input.distanceInKm,
         timeInMillis = input.timeInMillis,
-        isCompleted = input.isCompleted
+        state = input.state
     )
 
     override fun toDTO(input: SessionModel) = SessionEntity(
@@ -27,7 +27,7 @@ class SessionMapper @Inject constructor() : Mapper<SessionEntity, SessionModel> 
         distanceInKm = input.distanceInKm,
         speedInKmph = input.speedInKmph,
         timeInMillis = input.timeInMillis,
-        isCompleted = input.isCompleted,
+        state = input.state,
         timestamp = input.timestamp
     ).apply {
         id = input.id

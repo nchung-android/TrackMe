@@ -1,5 +1,6 @@
 package com.nchungdev.domain.usecase.session
 
+import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.domain.repository.SessionRepository
 import com.nchungdev.domain.usecase.base.UseCase
 import com.nchungdev.domain.util.IoDispatcher
@@ -8,11 +9,10 @@ import javax.inject.Inject
 
 class CreateSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
-    @IoDispatcher coroutineDispatcher: CoroutineDispatcher
-) : UseCase<UseCase.NoParams, Unit>(coroutineDispatcher) {
+    @IoDispatcher coroutineDispatcher: CoroutineDispatcher,
+) : UseCase<UseCase.NoParams, SessionModel>(coroutineDispatcher) {
 
-
-    override suspend fun execute(parameters: NoParams) {
-        sessionRepository.createNewSession()
+    override suspend fun execute(parameters: NoParams): SessionModel {
+        return sessionRepository.createNewSession()
     }
 }

@@ -16,7 +16,7 @@
         <item name="android:windowBackground">@drawable/bg_dialog</item>
         <item name="android:background">@null</item>
         <item name="windowMinWidthMinor">@fraction/dialog_min_width_minor</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="TrackMe.Theme.NoActionBar">

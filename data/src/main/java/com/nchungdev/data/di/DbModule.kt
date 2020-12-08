@@ -4,8 +4,10 @@ import android.content.Context
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
+import com.nchungdev.data.db.LocationDAO
 import com.nchungdev.data.db.SessionDAO
 import com.nchungdev.data.db.TrackingDatabase
+import com.nchungdev.data.db.mapper.LocationMapper
 import com.nchungdev.data.db.mapper.SessionMapper
 import com.nchungdev.data.provider.*
 import com.nchungdev.data.repository.LocationRepositoryImpl
@@ -23,15 +25,26 @@ object DbModule {
 
     @Provides
     @Singleton
-    fun provideRunningDatabase(context: Context): TrackingDatabase = TrackingDatabase.invoke(context)
+    fun provideRunningDatabase(context: Context): TrackingDatabase =
+        TrackingDatabase.invoke(context)
 
     @Singleton
     @Provides
-    fun provideRunDAO(trackingDatabase: TrackingDatabase): SessionDAO = trackingDatabase.getRunDao()
+    fun provideRunDAO(trackingDatabase: TrackingDatabase): SessionDAO =
+        trackingDatabase.getSessionDao()
+
+    @Singleton
+    @Provides
+    fun provideLocationDAO(trackingDatabase: TrackingDatabase): LocationDAO =
+        trackingDatabase.getLocationDao()
 
     @Singleton
     @Provides
     fun provideSessionMapper(): SessionMapper = SessionMapper()
+
+    @Singleton
+    @Provides
+    fun provideLocationMapper(): LocationMapper = LocationMapper()
 
     @Singleton
     @Provides
@@ -48,7 +61,8 @@ object DbModule {
 
     @Singleton
     @Provides
-    fun provideLocationProvider(locationProviderImpl: LocationProviderImpl): LocationProvider = locationProviderImpl
+    fun provideLocationProvider(locationProviderImpl: LocationProviderImpl): LocationProvider =
+        locationProviderImpl
 
     @Singleton
     @Provides
@@ -60,9 +74,11 @@ object DbModule {
 
     @Singleton
     @Provides
-    fun provideTimerTickListener(timerTickCallback: TimerTickCallback): TimerTickListener = timerTickCallback
+    fun provideTimerTickListener(timerTickCallback: TimerTickCallback): TimerTickListener =
+        timerTickCallback
 
     @Singleton
     @Provides
-    fun provideTimerProvider(timerProviderImpl: TimerProviderImpl): TimerProvider = timerProviderImpl
+    fun provideTimerProvider(timerProviderImpl: TimerProviderImpl): TimerProvider =
+        timerProviderImpl
 }

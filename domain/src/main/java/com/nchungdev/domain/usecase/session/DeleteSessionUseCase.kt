@@ -7,11 +7,11 @@ import com.nchungdev.domain.util.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Inject
 
-class CancelSessionUseCase @Inject constructor(
+class DeleteSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
     @IoDispatcher coroutineDispatcher: CoroutineDispatcher
 ) :
-    UseCase<CancelSessionUseCase.Params, Unit>(coroutineDispatcher) {
+    UseCase<DeleteSessionUseCase.Params, Unit>(coroutineDispatcher) {
 
     override suspend fun execute(parameters: Params) {
         sessionRepository.delete(parameters.session)

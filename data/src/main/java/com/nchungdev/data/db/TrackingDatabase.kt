@@ -5,15 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.nchungdev.data.model.SessionEntity
+import com.nchungdev.data.entity.LocationEntity
+import com.nchungdev.data.entity.SessionEntity
 
 @Database(
-    entities = [SessionEntity::class],
-    version = 12
+    entities = [SessionEntity::class, LocationEntity::class],
+    version = 15
 )
 @TypeConverters(value = [Converters::class])
 abstract class TrackingDatabase : RoomDatabase() {
-    abstract fun getRunDao(): SessionDAO
+    abstract fun getSessionDao(): SessionDAO
+    abstract fun getLocationDao(): LocationDAO
 
     companion object {
 
@@ -25,7 +27,11 @@ abstract class TrackingDatabase : RoomDatabase() {
         private val LOCK = Any() // Makes sure no threads making the same thing at the same time
 
         private fun buildDatabase(context: Context) =
-            Room.databaseBuilder(context.applicationContext, TrackingDatabase::class.java, DATABASE_NAME)
+            Room.databaseBuilder(
+                context.applicationContext,
+                TrackingDatabase::class.java,
+                DATABASE_NAME
+            )
                 .fallbackToDestructiveMigration()
                 .build()
 

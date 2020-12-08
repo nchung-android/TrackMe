@@ -6,8 +6,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.lifecycle.LifecycleService
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.nchungdev.data.provider.TimerTickCallback
 import com.nchungdev.data.util.Constant
-import com.nchungdev.domain.usecase.RequestLocationUpdatesUseCase
+import com.nchungdev.domain.usecase.session.ControlSessionUpdatesUseCase
 import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.notification.NotificationModel
@@ -20,21 +21,18 @@ import javax.inject.Inject
 class LocationService : LifecycleService() {
 
     @Inject
-    lateinit var requestLocationUpdatesUseCase: RequestLocationUpdatesUseCase
+    lateinit var controlSessionUpdatesUseCase: ControlSessionUpdatesUseCase
 
-    private var currentTimeInMillis: CharSequence = ""
+    private var currentTime: CharSequence = ""
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
-            if (intent?.action != Constant.TIMER_TICK_ACTION) {
-                return
-            }
-            currentTimeInMillis = intent.getCharSequenceExtra("timeInMillis") ?: return
+            currentTime = TimerTickCallback.extractResult(intent) ?: return
             if (isMyServiceRunning(LocationService::class.java)) {
                 NotificationUtil.updateStopWatch(
                     context, NotificationModel(
                         resources.getString(R.string.app_name),
-                        currentTimeInMillis
+                        currentTime
                     )
                 )
             }
@@ -44,12 +42,14 @@ class LocationService : LifecycleService() {
     override fun onCreate() {
         super.onCreate()
         MainApp.getAppComponent().locationServiceComponent().create().inject(this)
-        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, IntentFilter(Constant.TIMER_TICK_ACTION))
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(receiver, IntentFilter(Constant.TIMER_TICK_ACTION))
     }
 
     override fun onDestroy() {
+        controlSessionUpdatesUseCase.interruptUpdates()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
-        currentTimeInMillis = ""
+        currentTime = ""
         super.onDestroy()
     }
 
@@ -70,19 +70,19 @@ class LocationService : LifecycleService() {
             NotificationUtil.makeNotification(
                 this, NotificationModel(
                     resources.getString(R.string.app_name),
-                    currentTimeInMillis
+                    currentTime
                 )
             )
         )
-        requestLocationUpdatesUseCase.startOrResumeUpdates()
+        controlSessionUpdatesUseCase.startOrResumeUpdates()
     }
 
     private fun pauseTracking() {
-        requestLocationUpdatesUseCase.pauseUpdates()
+        controlSessionUpdatesUseCase.pauseUpdates()
     }
 
     private fun stopTracking() {
-        requestLocationUpdatesUseCase.stopUpdates()
+        controlSessionUpdatesUseCase.stopUpdates()
         stopSelf()
         stopForeground(true)
     }

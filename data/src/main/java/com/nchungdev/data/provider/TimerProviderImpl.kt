@@ -1,11 +1,20 @@
 package com.nchungdev.data.provider
 
+import com.nchungdev.data.db.SessionDAO
 import com.nchungdev.domain.provider.TimerProvider
+import com.nchungdev.domain.util.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TimerProviderImpl @Inject constructor(
-    private val stopWatch: StopWatch
+    private val sessionDAO: SessionDAO,
+    private val stopWatch: StopWatch,
+    @IoDispatcher
+    private val dispatcher: CoroutineDispatcher,
 ) : TimerProvider {
 
     override fun reset() {
@@ -21,7 +30,12 @@ class TimerProviderImpl @Inject constructor(
     }
 
     override fun start() {
-        stopWatch.start()
+        CoroutineScope(dispatcher).launch {
+            val latestSessionAsync = sessionDAO.getLatestSessionAsync()
+            Timber.e("Session %s", latestSessionAsync.toString())
+            stopWatch.init(sessionDAO.getLatestSessionAsync()?.timeInMillis ?: 0)
+            stopWatch.start()
+        }
     }
 
     override fun stop() {

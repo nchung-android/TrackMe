@@ -20,4 +20,5 @@
 
     <dimen name="polyline_width">4dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="toolbar_elevation">3dp</dimen>
 </resources>
