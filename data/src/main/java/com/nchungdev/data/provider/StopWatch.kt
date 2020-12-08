@@ -19,18 +19,19 @@ interface StopWatch {
     fun stop()
 
     fun reset()
+
+    interface OnTickListener {
+        fun onTick(timeInMillis: Long)
+    }
 }
 
 enum class State {
     START, STOP
 }
 
-interface TimerTickListener {
-    fun onTick(time: CharSequence)
-}
-
-class StopWatchImpl @Inject constructor(private val timerTickListener: TimerTickListener) :
-    StopWatch {
+class StopWatchImpl @Inject constructor(
+    private val onTickListener: StopWatch.OnTickListener
+) : StopWatch {
 
     // Current time of stopwatch (in millis)
     private var currentTime: Long = 0
@@ -63,7 +64,7 @@ class StopWatchImpl @Inject constructor(private val timerTickListener: TimerTick
                     override fun handleMessage(msg: Message) {
                         super.handleMessage(msg)
                         if (msg.what == 0) {
-                            timerTickListener.onTick(TimeUtils.getFormattedStopWatchTime(currentTime))
+                            onTickListener.onTick(currentTime)
                         }
                     }
                 }
@@ -85,7 +86,7 @@ class StopWatchImpl @Inject constructor(private val timerTickListener: TimerTick
     }
 
     override fun getTimeIn(timeUnit: TimeUnit): Long {
-        return timeUnit.convert(currentTime, TimeUnit.MILLISECONDS);
+        return timeUnit.convert(currentTime, TimeUnit.MILLISECONDS)
     }
 }
 

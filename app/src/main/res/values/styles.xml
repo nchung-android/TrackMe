@@ -9,4 +9,48 @@
         <item name="android:colorBackground">#30000000</item>
     </style>
 
+    <style name="TrackMe.TextAppearance" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/primaryTextColor</item>
+        <item name="android:lineSpacingExtra">7sp</item>
+    </style>
+
+    <style name="TrackMe.TextAppearance.Primary">
+        <item name="android:textSize">@dimen/text_primary</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="TrackMe.TextAppearance.Message">
+        <item name="android:textSize">@dimen/text_normal</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TrackMe.TextAppearance.Title">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TrackMe.TextAppearance.Header">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TrackMe.Widget.Button.Dialog" parent="Widget.AppCompat.Button">
+        <item name="android:textSize">14sp</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TrackMe.Widget.Button.Dialog.Primary">
+        <item name="android:textColor">?attr/tcDialogButtonPrimary</item>
+        <item name="android:background">@drawable/btn_dialog_primary</item>
+        <item name="android:minHeight">36dp</item>
+    </style>
+
+    <style name="TrackMe.Widget.Button.Dialog.Negative" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">?attr/tcDialogButtonSecondary</item>
+        <item name="android:background">@drawable/btn_dialog_negative</item>
+        <item name="android:minHeight">36dp</item>
+    </style>
 </resources>

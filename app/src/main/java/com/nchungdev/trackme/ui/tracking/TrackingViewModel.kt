@@ -1,11 +1,9 @@
 package com.nchungdev.trackme.ui.tracking
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.lifecycle.*
 import com.nchungdev.data.entity.SessionState
-import com.nchungdev.data.provider.TimerTickCallback
 import com.nchungdev.domain.model.LocationModel
 import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.domain.usecase.base.UseCase
@@ -16,10 +14,9 @@ import com.nchungdev.domain.usecase.session.DeleteSessionUseCase
 import com.nchungdev.domain.usecase.session.GetLatestSessionUseCase
 import com.nchungdev.domain.usecase.session.UpdateSessionUseCase
 import com.nchungdev.domain.util.Result
-import com.nchungdev.trackme.ui.helper.BitmapHandler
+import com.nchungdev.trackme.ui.util.BitmapHandler
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 class TrackingViewModel @Inject constructor(
     private val getLastLocationUseCase: GetLastLocationUseCase,
@@ -31,13 +28,10 @@ class TrackingViewModel @Inject constructor(
     private val bitmapHandler: BitmapHandler,
 ) : ViewModel() {
 
-    private val _stopWatchTime = MutableLiveData<CharSequence>()
     private val _currentLocation = MediatorLiveData<Result<LocationModel>>()
     private val _session = MediatorLiveData<Result<SessionModel>>()
     private val _trackingState = MutableLiveData<TrackingState>()
-    private val _action = MutableLiveData<Action>()
-
-    val stopWatchTime: LiveData<CharSequence> = _stopWatchTime
+    private val _event = MutableLiveData<Event>()
 
     val currentLocation: LiveData<Result<LocationModel>> = _currentLocation
 
@@ -45,26 +39,28 @@ class TrackingViewModel @Inject constructor(
 
     val trackingState: LiveData<TrackingState> = _trackingState
 
-    val action: LiveData<Action> = _action
+    val event: LiveData<Event> = _event
 
     fun onInit(arguments: Bundle?, isServiceRunning: Boolean) {
-        val sessionModel = arguments?.getParcelable<SessionModel>(TrackingFragment.EXTRA_SESSION)
-        if (sessionModel != null) {
-            val trackingState = if (isServiceRunning) TrackingState.START else TrackingState.PAUSE
+        val session = arguments?.getParcelable<SessionModel>(TrackingFragment.EXTRA_SESSION)
+        if (session != null) {
+            val trackingState =
+                if (isServiceRunning && session.state == SessionState.RUNNING) TrackingState.RUNNING
+                else TrackingState.PAUSE
             _trackingState.postValue(trackingState)
-            _session.postValue(Result.Success(sessionModel))
+            _session.postValue(Result.Success(session))
         }
     }
 
     fun onLocationPermissionGranted() {
-        _trackingState.postValue(TrackingState.READY)
+        _trackingState.postValue(TrackingState.START)
         _currentLocation.addSource(getLastLocationUseCase(UseCase.NoParams)) {
-            if (trackingState.value != TrackingState.START) {
+            if (trackingState.value != TrackingState.RUNNING) {
                 _currentLocation.postValue(it)
             }
         }
         _session.addSource(getLatestSessionUseCase(UseCase.NoParams)) {
-            if (trackingState.value == TrackingState.START) {
+            if (trackingState.value == TrackingState.RUNNING) {
                 _session.postValue(it)
             }
         }
@@ -72,46 +68,45 @@ class TrackingViewModel @Inject constructor(
 
     fun onTrackingClicked() {
         when (trackingState.value) {
-            TrackingState.READY -> {
+            TrackingState.START -> {
                 viewModelScope.launch {
-                    val session = createSessionUseCase(UseCase.NoParams)
-                    if (session is Result.Success) {
-                        val sessionModel = session.data
-                        sessionModel.state = SessionState.RUNNING
-                        updateSessionUseCase(UpdateSessionUseCase.Params(sessionModel))
-                        _trackingState.value = TrackingState.START
+                    when (createSessionUseCase(CreateSessionUseCase.Params(SessionState.RUNNING))) {
+                        is Result.Success -> _trackingState.postValue(TrackingState.RUNNING)
+                        is Result.Error -> _event.postValue(Event.CLOSE_SESSION)
+                        else -> Unit
                     }
                 }
             }
-            TrackingState.START -> {
+            TrackingState.RUNNING -> {
                 viewModelScope.launch {
                     val session = getSession() ?: return@launch
-                    session.state = SessionState.READY
-                    updateSessionUseCase(UpdateSessionUseCase.Params(getSession() ?: return@launch))
+                    session.state = SessionState.NOT_RUNNING
+                    updateSessionUseCase(UpdateSessionUseCase.Params(session))
                     _trackingState.postValue(TrackingState.PAUSE)
                 }
             }
-            TrackingState.PAUSE -> _action.postValue(Action.CONFIRM_SAVE_SESSION)
+            TrackingState.PAUSE -> _event.postValue(Event.CONFIRM_SAVE_SESSION)
             else -> Unit
         }
     }
 
     fun onContinueClicked() {
         if (trackingState.value == TrackingState.PAUSE) {
-            _trackingState.value = TrackingState.START
+            viewModelScope.launch {
+                val session = getSession() ?: return@launch
+                session.state = SessionState.RUNNING
+                updateSessionUseCase(UpdateSessionUseCase.Params(session))
+                _trackingState.postValue(TrackingState.RUNNING)
+            }
             requestLocationUpdatesUseCase.stopUpdates()
         }
     }
 
-    fun onStopWatchReceived(intent: Intent?) {
-        _stopWatchTime.postValue(TimerTickCallback.extractResult(intent) ?: return)
-    }
-
     fun onBackPressed() = when (trackingState.value) {
-        TrackingState.START,
+        TrackingState.RUNNING,
         TrackingState.PAUSE,
         -> {
-            _action.postValue(Action.WARNING_EXIT_SESSION)
+            _event.postValue(Event.WARNING_EXIT_SESSION)
             true
         }
         else -> false
@@ -125,7 +120,7 @@ class TrackingViewModel @Inject constructor(
             when (updateSessionUseCase(UpdateSessionUseCase.Params(session))) {
                 is Result.Success -> {
                     _trackingState.postValue(TrackingState.FINISH)
-                    _action.postValue(Action.CLOSE_SESSION)
+                    _event.postValue(Event.CLOSE_SESSION)
                 }
                 is Result.Error -> Unit
                 Result.Loading -> Unit
@@ -139,7 +134,7 @@ class TrackingViewModel @Inject constructor(
             when (deleteSessionUseCase(DeleteSessionUseCase.Params(session))) {
                 is Result.Success -> {
                     _trackingState.postValue(TrackingState.FINISH)
-                    _action.postValue(Action.CLOSE_SESSION)
+                    _event.postValue(Event.CLOSE_SESSION)
                 }
                 is Result.Error -> Unit
                 Result.Loading -> Unit
@@ -168,9 +163,9 @@ class TrackingViewModel @Inject constructor(
         return session.data
     }
 
-    enum class Action {
+    enum class Event {
         WARNING_EXIT_SESSION,
         CONFIRM_SAVE_SESSION,
-        CLOSE_SESSION
+        CLOSE_SESSION,
     }
 }

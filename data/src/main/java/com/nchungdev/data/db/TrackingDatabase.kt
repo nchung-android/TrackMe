@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.nchungdev.data.db.dao.LocationDAO
+import com.nchungdev.data.db.dao.SessionDAO
 import com.nchungdev.data.entity.LocationEntity
 import com.nchungdev.data.entity.SessionEntity
 
@@ -19,7 +21,7 @@ abstract class TrackingDatabase : RoomDatabase() {
 
     companion object {
 
-        private const val DATABASE_NAME = "trackme_db"
+        private const val DATABASE_NAME = "tracking_db"
 
         @Volatile // All threads have immediate access to this property
         private var instance: TrackingDatabase? = null

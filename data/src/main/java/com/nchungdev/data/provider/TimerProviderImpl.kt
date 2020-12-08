@@ -1,6 +1,6 @@
 package com.nchungdev.data.provider
 
-import com.nchungdev.data.db.SessionDAO
+import com.nchungdev.data.db.dao.SessionDAO
 import com.nchungdev.domain.provider.TimerProvider
 import com.nchungdev.domain.util.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher

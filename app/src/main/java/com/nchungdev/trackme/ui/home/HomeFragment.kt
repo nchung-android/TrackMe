@@ -13,7 +13,7 @@ import com.nchungdev.domain.util.Result
 import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.FragmentHomeBinding
-import com.nchungdev.trackme.ui.base.event.Event
+import com.nchungdev.trackme.event.Screen
 import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
 import com.nchungdev.trackme.ui.base.rv.BaseItemDecoration
 import com.nchungdev.trackme.ui.home.rv.HomeAdapter
@@ -67,8 +67,8 @@ class HomeFragment : BaseVBFragment<HomeViewModel, FragmentHomeBinding>() {
         }
 
         viewModel.screen.observe(viewLifecycleOwner) {
-            when (it.name) {
-                Event.SESSION_DETAIL -> {
+            when (it.event) {
+                Screen.Event.SESSION_DETAIL -> {
                     if (it.data is SessionModel) {
                         Navigator.openSessionDetails(requireContext(), it.data)
                     }

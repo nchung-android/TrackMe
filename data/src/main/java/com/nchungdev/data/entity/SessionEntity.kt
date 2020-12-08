@@ -15,7 +15,7 @@ data class SessionEntity(
     var distanceInKm: Float = 0f,
     var speedInKmph: Float = 0f,
     var timeInMillis: Long = 0L,
-    var state: Int = SessionState.READY,
+    var state: Int = SessionState.NOT_RUNNING,
     var timestamp: Long = Calendar.getInstance().timeInMillis,
 ) {
     @PrimaryKey(autoGenerate = true)

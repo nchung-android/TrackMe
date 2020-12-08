@@ -2,7 +2,7 @@ package com.nchungdev.data.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-import com.nchungdev.data.db.SessionDAO
+import com.nchungdev.data.db.dao.SessionDAO
 import com.nchungdev.data.db.mapper.SessionMapper
 import com.nchungdev.data.entity.SessionEntity
 import com.nchungdev.domain.model.SessionModel
@@ -22,10 +22,8 @@ class SessionRepositoryImpl @Inject constructor(
         sessionDAO.update(sessionMapper.toDTO(session))
     }
 
-    override suspend fun createNewSession(): SessionModel {
-        val sessionEntity = SessionEntity(startLocation = locationProvider.getStartLocation())
-        sessionDAO.insert(sessionEntity)
-        return sessionMapper.fromDTO(sessionEntity)
+    override suspend fun createNewSession(state: Int) {
+        sessionDAO.insert(SessionEntity(startLocation = locationProvider.getStartLocation(), state = state))
     }
 
     override suspend fun save(session: SessionModel) =

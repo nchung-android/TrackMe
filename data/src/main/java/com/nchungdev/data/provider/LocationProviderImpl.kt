@@ -10,8 +10,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
-import com.nchungdev.data.util.Constant.LOCATION_REQUEST_FASTEST_INTERVAL
-import com.nchungdev.data.util.Constant.LOCATION_REQUEST_INTERVAL
 import com.nchungdev.data.util.LocationPermissionNotGrantedException
 import com.nchungdev.data.util.asDeferred
 import com.nchungdev.data.util.toModel
@@ -66,6 +64,7 @@ class LocationProviderImpl @Inject constructor(
                     locationUpdatesCallback,
                     Looper.getMainLooper()
                 )
+                Timber.e("StartLocationUpdates")
             }
         } catch (e: SecurityException) {
             Timber.e("Permission was revoked")
@@ -73,6 +72,7 @@ class LocationProviderImpl @Inject constructor(
     }
 
     override fun stopRequestLocationUpdates() {
+        Timber.e("StopLocationUpdates")
         fusedLocationClient.removeLocationUpdates(locationUpdatesCallback)
     }
 
@@ -87,5 +87,10 @@ class LocationProviderImpl @Inject constructor(
             appContext,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    companion object {
+        const val LOCATION_REQUEST_INTERVAL = 10000L
+        const val LOCATION_REQUEST_FASTEST_INTERVAL = 5000L
     }
 }

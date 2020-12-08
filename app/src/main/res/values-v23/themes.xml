@@ -8,8 +8,13 @@
         <item name="actionModeCloseDrawable">@drawable/ic_action_back</item>
         <item name="actionModeCloseButtonStyle">@style/TrackMe.Widget.ActionButton.Close</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowMinWidthMajor">55%</item>
-        <item name="android:windowMinWidthMinor">100%</item>
-        <item name="android:textColorPrimary">@color/primaryTextColor</item>
+        <item name="dialogTheme">@style/TrackMe.Theme.MaterialDialog</item>
+        <item name="toolbarStyle">@style/TrackMe.Theme.Toolbar</item>
+        <item name="colorDrawableTint">@color/colorDrawableTint</item>
+        <item name="colorRipple">@color/ripple</item>
+        <item name="colorRippleAccent">@color/rippleAccent</item>
+        <item name="btnDialogPrimary">@color/colorAccent</item>
+        <item name="tcDialogButtonPrimary">@color/textDialogButtonPrimary</item>
+        <item name="tcDialogButtonSecondary">@color/textDialogButtonSecondary</item>
     </style>
 </resources>

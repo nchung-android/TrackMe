@@ -11,7 +11,7 @@ interface SessionRepository {
 
     suspend fun update(session: SessionModel)
 
-    suspend fun createNewSession(): SessionModel
+    suspend fun createNewSession(state: Int)
 
     suspend fun getLatestSessionAsync(): SessionModel?
 

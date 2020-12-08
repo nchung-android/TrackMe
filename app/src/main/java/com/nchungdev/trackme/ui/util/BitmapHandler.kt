@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.helper
+package com.nchungdev.trackme.ui.util
 
 import android.content.Context
 import android.content.ContextWrapper
