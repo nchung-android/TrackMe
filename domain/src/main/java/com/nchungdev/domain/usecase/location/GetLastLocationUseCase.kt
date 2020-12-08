@@ -13,11 +13,8 @@ class GetLastLocationUseCase @Inject constructor(
     MediatorUseCase<UseCase.NoParams, LocationModel>() {
 
     override fun execute(parameters: UseCase.NoParams) {
-        result.postValue(Result.Loading)
         result.addSource(locationRepository.getLastLocation()) {
-            if (it == null) {
-                result.postValue(Result.Error(Exception()))
-            } else {
+            if (it != null) {
                 result.postValue(Result.Success(it))
             }
         }

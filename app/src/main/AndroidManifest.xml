@@ -38,10 +38,12 @@
 
         <activity
             android:name=".ui.main.MainActivity"
+            android:launchMode="singleTask"
             android:theme="@style/TrackMe.Theme.NoActionBar" />
 
         <activity
             android:name=".ui.tracking.TrackingActivity"
+            android:launchMode="singleTask"
             android:theme="@style/TrackMe.Theme.NoActionBar" />
         <activity
             android:name=".ui.detail.DetailActivity"

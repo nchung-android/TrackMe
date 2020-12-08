@@ -76,7 +76,7 @@ abstract class BaseActivity : AppCompatActivity(), PermissionRequestable {
         if (getMenuResId() != 0) {
             menuInflater.inflate(getMenuResId(), menu)
         }
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem) =

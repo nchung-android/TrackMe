@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -34,8 +33,6 @@ import kotlinx.coroutines.*
 class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBinding>(),
     OnMapReadyCallback,
     View.OnClickListener {
-
-    private var currentZoomLevel: Float = MapConfig.DEFAULT_ZOOM
 
     // init views
     private lateinit var mapView: MapView
@@ -69,11 +66,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         setDefaultData()
         subscribeToObservers()
         requestLocationPermissions()
-        mapView.getMapAsync(this)
-        viewModel.onInit(
-            arguments,
-            context?.isMyServiceRunning(LocationService::class.java) == true
-        )
+        viewModel.onInit(arguments)
     }
 
     private fun setDefaultData() {
@@ -115,29 +108,32 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
 
     override fun onMapReady(googleMap: GoogleMap?) {
         map = googleMap
-        if (isLocationPermissionGranted()) {
-            MapConfig(map ?: return)
-            polylineHelper = PolylineHelper(map ?: return, polylineOptions)
-            polylineHelper?.addAllPolylines(pathPoints)
-            viewModel.currentLocation.observe(viewLifecycleOwner) {
-                when (it) {
-                    is Result.Success -> {
-                        map?.moveCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                it.data.toLatLng(),
-                                MapConfig.DEFAULT_ZOOM
-                            )
+        MapConfig(map ?: return)
+        polylineHelper = PolylineHelper(map ?: return, polylineOptions)
+        polylineHelper?.addAllPolylines(pathPoints)
+        viewModel.currentLocation.observe(viewLifecycleOwner) {
+            when (it) {
+                is Result.Success -> {
+                    map?.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                            it.data.toLatLng(),
+                            MapConfig.DEFAULT_ZOOM
                         )
-                    }
-                    is Result.Error -> Unit
-                    Result.Loading -> Unit
+                    )
                 }
+                is Result.Error -> Unit
+                Result.Loading -> Unit
             }
         }
     }
 
+    private fun setupMapView() {
+        mapView.getMapAsync(this)
+    }
+
     private fun requestLocationPermissions() {
         if (PermissionUtils.isLocationPermissionGranted(requireContext())) {
+            setupMapView()
             viewModel.onLocationPermissionGranted()
         } else {
             PermissionUtils.requestLocationPermissions(
@@ -150,6 +146,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                         showDialog: Boolean,
                     ) {
                         if (grantResults.isNotEmpty() && grantResults.first() == PermissionChecker.PERMISSION_GRANTED) {
+                            setupMapView()
                             viewModel.onLocationPermissionGranted()
                         } else {
                             showSnackBar()
@@ -236,7 +233,14 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                     }
                         .show(childFragmentManager)
                 }
-                TrackingViewModel.Event.CLOSE_SESSION -> requireActivity().finish()
+                TrackingViewModel.Event.CLOSE_SESSION -> {
+                    requireActivity().apply {
+                        if (isTaskRoot) {
+                            Navigator.openMainActivity(this)
+                        }
+                        finish()
+                    }
+                }
             }
         }
     }
@@ -283,10 +287,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
     }
 
     companion object {
-        const val EXTRA_SESSION = "xSession"
-
-        fun newInstance(sessionModel: SessionModel?) = TrackingFragment().apply {
-            arguments = bundleOf(EXTRA_SESSION to sessionModel)
-        }
+        const val EXTRA_OPEN_FROM_NOTIF = "xOpenFromNotif"
+        const val EXTRA_OPEN_FROM_SPLASH = "xOpenFromSplashScreen"
     }
 }

@@ -15,9 +15,9 @@ object Navigator {
         context.startActivity(Intent(context, MainActivity::class.java))
     }
 
-    fun openTrackingActivity(context: Context, sessionModel: SessionModel? = null) {
+    fun openTrackingActivity(context: Context, fromSplash: Boolean = false) {
         context.startActivity(Intent(context, TrackingActivity::class.java).apply {
-            putExtra(TrackingFragment.EXTRA_SESSION, sessionModel)
+            putExtra(TrackingFragment.EXTRA_OPEN_FROM_SPLASH, fromSplash)
         })
     }
 

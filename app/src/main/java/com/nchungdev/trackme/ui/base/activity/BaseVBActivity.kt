@@ -46,6 +46,6 @@ abstract class BaseVBActivity<VM : ViewModel, B : ViewBinding> : BaseActivity() 
         if (getMenuResId() != 0) {
             menuInflater.inflate(getMenuResId(), menu)
         }
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu)
     }
 }
