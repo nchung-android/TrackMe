@@ -3,8 +3,8 @@ package com.nchungdev.data.provider
 import android.location.Location
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
-import com.nchungdev.data.db.LocationDAO
-import com.nchungdev.data.db.SessionDAO
+import com.nchungdev.data.db.dao.LocationDAO
+import com.nchungdev.data.db.dao.SessionDAO
 import com.nchungdev.data.entity.LocationEntity
 import com.nchungdev.data.entity.SessionState
 import com.nchungdev.data.util.toModel
@@ -47,6 +47,7 @@ class LocationUpdatesCallback @Inject constructor(
             locationEntity.latitude = location.latitude
             locationEntity.longitude = location.longitude
             locationDAO.update(locationEntity)
+            Timber.e("Location %s", locationEntity.toString())
         }
     }
 
@@ -59,9 +60,10 @@ class LocationUpdatesCallback @Inject constructor(
             distanceInKm += distance
             lastLocationGps = location
         }
-        Timber.e("%s", lastTrackingModel.toString())
+        Timber.e("TrackingModel %s", lastTrackingModel.toString())
         CoroutineScope(dispatcher).launch {
             val sessionEntity = (sessionDAO.getLatestSessionAsync() ?: return@launch)
+            Timber.e("%d", sessionEntity.state)
             if (sessionEntity.state == SessionState.RUNNING) {
                 sessionEntity.apply {
                     timeInMillis = timerProvider.getTimeIn(TimeUnit.MILLISECONDS)

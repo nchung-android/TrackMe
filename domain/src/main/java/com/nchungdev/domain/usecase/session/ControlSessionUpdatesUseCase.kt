@@ -5,14 +5,13 @@ import com.nchungdev.domain.repository.LocationRepository
 import javax.inject.Inject
 
 class ControlSessionUpdatesUseCase @Inject constructor(
-    private val sessionUseCase: UpdateSessionUseCase,
     private val timerProvider: TimerProvider,
     private val locationRepository: LocationRepository,
 ) {
 
     private var isFirstRun = true
 
-    fun startOrResumeUpdates() {
+    fun startUpdates() {
         if (isFirstRun) {
             locationRepository.startRequestLocationUpdates()
             isFirstRun = false

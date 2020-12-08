@@ -10,9 +10,11 @@ import javax.inject.Inject
 class CreateSessionUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
     @IoDispatcher coroutineDispatcher: CoroutineDispatcher,
-) : UseCase<UseCase.NoParams, SessionModel>(coroutineDispatcher) {
+) : UseCase<CreateSessionUseCase.Params, Unit>(coroutineDispatcher) {
 
-    override suspend fun execute(parameters: NoParams): SessionModel {
-        return sessionRepository.createNewSession()
+    override suspend fun execute(parameters: Params) {
+        sessionRepository.createNewSession(parameters.state)
     }
+
+    class Params(val state: Int)
 }

@@ -12,7 +12,7 @@ import androidx.core.app.NotificationCompat
 import com.nchungdev.data.util.Util
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.ui.main.MainActivity
-import com.nchungdev.trackme.ui.util.Constants
+import com.nchungdev.trackme.ui.util.Actions
 
 object NotificationUtil {
     const val NOTIFICATION_ID = 1
@@ -23,7 +23,7 @@ object NotificationUtil {
         context,
         0,
         Intent(context, MainActivity::class.java).also {
-            it.action = Constants.ACTION_SHOW_TRACKING_FRAGMENT
+            it.action = Actions.ACTION_SHOW_TRACKING_FRAGMENT
         },
         PendingIntent.FLAG_UPDATE_CURRENT
     )

@@ -17,13 +17,11 @@ import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.FragmentDetailBinding
 import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
-import com.nchungdev.trackme.ui.helper.MapConfig
-import com.nchungdev.trackme.ui.helper.MapViewLifecycleManager
-import com.nchungdev.trackme.ui.helper.PolylineHelper
-import com.nchungdev.trackme.ui.util.Constants
+import com.nchungdev.trackme.ui.util.MapConfig
+import com.nchungdev.trackme.ui.util.MapViewLifecycleManager
+import com.nchungdev.trackme.ui.util.PolylineHelper
 
-class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(),
-    OnMapReadyCallback {
+class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(), OnMapReadyCallback {
     private lateinit var mapView: MapView
     private var map: GoogleMap? = null
 
@@ -67,11 +65,11 @@ class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(),
                 map.moveCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         startLocation,
-                        Constants.MAP_ZOOM
+                        MapConfig.DEFAULT_ZOOM
                     )
                 )
                 pathPoints = it.polylines.toMutableList()
-                polylineHelper?.addLatestPolyline(pathPoints.last())
+                polylineHelper?.addAllPolylines(pathPoints)
                 moveCameraToUser()
             }
         }
@@ -82,12 +80,11 @@ class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(),
             map?.animateCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     pathPoints.last().last().toLatLng(),
-                    Constants.MAP_ZOOM
+                    MapConfig.DEFAULT_ZOOM
                 )
             )
         }
     }
-
 
     override fun onLowMemory() {
         mapView.onLowMemory()

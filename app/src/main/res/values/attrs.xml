@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="colorDialogBg" />
+    <attr name="colorDialogBg" format="reference|color" />
+    <attr name="colorDrawableTint" format="reference|color" />
+    <attr name="colorRippleAccent" format="reference|color" />
+    <attr name="colorRipple" format="reference|color" />
+    <attr name="btnDialogPrimary" format="reference|color" />
+    <attr name="tcDialogButtonPrimary" format="reference|color"/>
+    <attr name="tcDialogButtonSecondary" format="reference|color"/>
 </resources>

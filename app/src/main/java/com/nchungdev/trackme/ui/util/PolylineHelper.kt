@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.helper
+package com.nchungdev.trackme.ui.util
 
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.PolylineOptions

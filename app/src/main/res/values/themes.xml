@@ -6,16 +6,20 @@
         <item name="actionModeBackground">@android:color/transparent</item>
         <item name="actionModeCloseDrawable">@drawable/ic_action_back</item>
         <item name="actionModeCloseButtonStyle">@style/TrackMe.Widget.ActionButton.Close</item>
-        <item name="android:textColorPrimary">@color/primaryTextColor</item>
         <item name="dialogTheme">@style/TrackMe.Theme.MaterialDialog</item>
-
         <item name="toolbarStyle">@style/TrackMe.Theme.Toolbar</item>
+        <item name="colorDrawableTint">@color/colorDrawableTint</item>
+        <item name="colorRipple">@color/ripple</item>
+        <item name="colorRippleAccent">@color/rippleAccent</item>
+        <item name="btnDialogPrimary">@color/colorAccent</item>
+        <item name="tcDialogButtonPrimary">@color/textDialogButtonPrimary</item>
+        <item name="tcDialogButtonSecondary">@color/textDialogButtonSecondary</item>
     </style>
 
     <style name="TrackMe.Theme.MaterialDialog" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:windowBackground">@drawable/bg_dialog</item>
-        <item name="android:background">@null</item>
-        <item name="windowMinWidthMinor">@fraction/dialog_min_width_minor</item>
+        <item name="android:background">@drawable/bg_dialog</item>
+        <item name="android:windowMinWidthMajor">55%</item>
+        <item name="android:windowMinWidthMinor">@fraction/dialog_min_width_minor</item>
         <item name="android:colorAccent">@color/colorAccent</item>
     </style>
 
@@ -24,7 +28,4 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="TrackMe.Theme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="TrackMe.Theme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

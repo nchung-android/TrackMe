@@ -10,32 +10,15 @@
         android:name="com.nchungdev.trackme.ui.home.HomeFragment"
         android:label="@string/app_name"
         tools:layout="@layout/fragment_home" />
+
     <fragment
         android:id="@+id/recordFragment"
         android:name="com.nchungdev.trackme.ui.tracking.TrackingFragment"
-        android:label="@string/tracking"
+        android:label="@string/title_tracking"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/aboutFragment"
         android:name="com.nchungdev.trackme.ui.about.AboutFragment"
-        android:label="@string/about" /><fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.nchungdev.trackme.ui.detail.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first" >
-
-        <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
-    </fragment><fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.nchungdev.trackme.ui.detail.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second" >
-
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
-    </fragment>
+        android:label="@string/title_about" />
 </navigation>

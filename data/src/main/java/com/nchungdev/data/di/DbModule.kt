@@ -4,8 +4,8 @@ import android.content.Context
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
-import com.nchungdev.data.db.LocationDAO
-import com.nchungdev.data.db.SessionDAO
+import com.nchungdev.data.db.dao.LocationDAO
+import com.nchungdev.data.db.dao.SessionDAO
 import com.nchungdev.data.db.TrackingDatabase
 import com.nchungdev.data.db.mapper.LocationMapper
 import com.nchungdev.data.db.mapper.SessionMapper
@@ -30,13 +30,11 @@ object DbModule {
 
     @Singleton
     @Provides
-    fun provideRunDAO(trackingDatabase: TrackingDatabase): SessionDAO =
-        trackingDatabase.getSessionDao()
+    fun provideRunDAO(db: TrackingDatabase): SessionDAO = db.getSessionDao()
 
     @Singleton
     @Provides
-    fun provideLocationDAO(trackingDatabase: TrackingDatabase): LocationDAO =
-        trackingDatabase.getLocationDao()
+    fun provideLocationDAO(db: TrackingDatabase): LocationDAO = db.getLocationDao()
 
     @Singleton
     @Provides
@@ -61,8 +59,7 @@ object DbModule {
 
     @Singleton
     @Provides
-    fun provideLocationProvider(locationProviderImpl: LocationProviderImpl): LocationProvider =
-        locationProviderImpl
+    fun provideLocationProvider(providerImpl: LocationProviderImpl): LocationProvider = providerImpl
 
     @Singleton
     @Provides
@@ -74,11 +71,9 @@ object DbModule {
 
     @Singleton
     @Provides
-    fun provideTimerTickListener(timerTickCallback: TimerTickCallback): TimerTickListener =
-        timerTickCallback
+    fun provideStopWatchListener(callback: StopWatchOnTickCallback): StopWatch.OnTickListener = callback
 
     @Singleton
     @Provides
-    fun provideTimerProvider(timerProviderImpl: TimerProviderImpl): TimerProvider =
-        timerProviderImpl
+    fun provideTimerProvider(providerImpl: TimerProviderImpl): TimerProvider = providerImpl
 }

@@ -3,7 +3,7 @@ package com.nchungdev.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.nchungdev.data.db.CombinedLiveData
-import com.nchungdev.data.db.LocationDAO
+import com.nchungdev.data.db.dao.LocationDAO
 import com.nchungdev.data.db.mapper.LocationMapper
 import com.nchungdev.domain.model.LocationModel
 import com.nchungdev.domain.provider.LocationProvider

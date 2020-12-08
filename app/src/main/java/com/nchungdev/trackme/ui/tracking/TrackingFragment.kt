@@ -1,9 +1,6 @@
 package com.nchungdev.trackme.ui.tracking
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -16,8 +13,8 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.material.snackbar.Snackbar
 import com.nchungdev.data.db.mapper.toLatLng
-import com.nchungdev.data.util.Constant
 import com.nchungdev.data.util.TimeUtils
 import com.nchungdev.domain.model.LocationModel
 import com.nchungdev.domain.model.SessionModel
@@ -31,18 +28,14 @@ import com.nchungdev.trackme.ui.base.PermissionRequestable
 import com.nchungdev.trackme.ui.base.activity.BaseActivity
 import com.nchungdev.trackme.ui.base.dialog.BaseDialogFragment
 import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
-import com.nchungdev.trackme.ui.helper.*
-import com.nchungdev.trackme.ui.util.Constants
-import com.nchungdev.trackme.ui.util.PermissionUtils
-import com.nchungdev.trackme.ui.util.isMyServiceRunning
+import com.nchungdev.trackme.ui.util.*
 import kotlinx.coroutines.*
-
 
 class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBinding>(),
     OnMapReadyCallback,
     View.OnClickListener {
 
-    private var currentZoomLevel: Float = Constants.MAP_ZOOM
+    private var currentZoomLevel: Float = MapConfig.DEFAULT_ZOOM
 
     // init views
     private lateinit var mapView: MapView
@@ -59,12 +52,6 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
 
     private var polylineHelper: PolylineHelper? = null
 
-    private val stopWatchReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            viewModel.onStopWatchReceived(intent)
-        }
-    }
-
     override fun getLayoutResId() = R.layout.fragment_tracking
 
     override fun injectDagger() {
@@ -76,26 +63,25 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
     override fun inits(binding: FragmentTrackingBinding, savedInstanceState: Bundle?) {
         this.binding = binding
         mapView = binding.mapView
-        binding.btnTracking.setOnClickListener(this)
+        binding.btnTracking.fab.setOnClickListener(this)
         binding.btnStop.setOnClickListener(this)
         lifecycle.addObserver(MapViewLifecycleManager(mapView, savedInstanceState))
+        setDefaultData()
         subscribeToObservers()
         requestLocationPermissions()
         mapView.getMapAsync(this)
-        viewModel.onInit(arguments,
-            context?.isMyServiceRunning(LocationService::class.java) == true)
+        viewModel.onInit(
+            arguments,
+            context?.isMyServiceRunning(LocationService::class.java) == true
+        )
     }
 
-    override fun onStop() {
-        unregisterReceiver(stopWatchReceiver)
-        super.onStop()
-    }
-
-    override fun onStart() {
-        if (viewModel.trackingState.value == TrackingState.START) {
-            registerReceiver(stopWatchReceiver, IntentFilter(Constant.TIMER_TICK_ACTION))
+    private fun setDefaultData() {
+        (binding ?: return).apply {
+            tvTotalTime.text = TimeUtils.getFormattedStopWatchTime(0L)
+            tvDistance.text = getString(R.string.distance_km_unit, 0F)
+            tvSpeed.text = getString(R.string.speed_kmh_unit, 0F)
         }
-        super.onStart()
     }
 
     override fun onLowMemory() {
@@ -139,7 +125,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                         map?.moveCamera(
                             CameraUpdateFactory.newLatLngZoom(
                                 it.data.toLatLng(),
-                                Constants.MAP_ZOOM
+                                MapConfig.DEFAULT_ZOOM
                             )
                         )
                     }
@@ -165,10 +151,20 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                     ) {
                         if (grantResults.isNotEmpty() && grantResults.first() == PermissionChecker.PERMISSION_GRANTED) {
                             viewModel.onLocationPermissionGranted()
+                        } else {
+                            showSnackBar()
                         }
                     }
                 })
         }
+    }
+
+    private fun showSnackBar() {
+        val view = view ?: return
+        Snackbar.make(view, R.string.msg_permission_denied, Snackbar.LENGTH_INDEFINITE)
+            .setAction(R.string.open_setting) {
+                requireContext().openDetailsSetting()
+            }
     }
 
     private fun subscribeToObservers() {
@@ -177,59 +173,54 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
             when (it) {
                 is Result.Success -> {
                     when (viewModel.trackingState.value) {
-                        TrackingState.READY -> onTrackingReady(it.data)
-                        TrackingState.START -> onTracking(it.data)
-                        else -> showSessionData(it.data)
+                        TrackingState.START -> onTrackingReady(it.data)
+                        TrackingState.RUNNING -> onTracking(it.data)
+                        else -> onRestoreTracking(it.data)
                     }
                 }
                 is Result.Error -> Unit
                 Result.Loading -> Unit
             }
         }
-        viewModel.stopWatchTime.observe(viewLifecycleOwner) {
-            binding.tvTotalTime.text = it
-        }
         viewModel.trackingState.observe(viewLifecycleOwner) {
             when (it) {
-                TrackingState.READY -> {
-                    binding.btnTracking.setImageResource(R.drawable.ic_record)
-                    binding.btnStop.isVisible = false
-                    onTrackingReady(viewModel.session.value?.data ?: return@observe)
-                    viewModel.onStartRequestLocationUpdates()
-                }
                 TrackingState.START -> {
-                    binding.btnTracking.setImageResource(R.drawable.ic_pause)
+                    binding.btnTracking.fab.setImageResource(R.drawable.ic_record)
                     binding.btnStop.isVisible = false
-                    sendCommandToService(Constants.ACTION_START_SERVICE)
-                    registerReceiver(stopWatchReceiver, IntentFilter(Constant.TIMER_TICK_ACTION))
+                    viewModel.onStartRequestLocationUpdates()
+                    onTrackingReady(viewModel.session.value?.data ?: return@observe)
+                }
+                TrackingState.RUNNING -> {
+                    binding.btnTracking.fab.setImageResource(R.drawable.ic_pause)
+                    binding.btnStop.isVisible = false
+                    sendCommandToService(Actions.ACTION_START_SERVICE)
                     viewModel.onStopRequestLocationUpdates()
                 }
                 TrackingState.PAUSE -> {
-                    binding.btnTracking.setImageResource(R.drawable.ic_stop)
+                    binding.btnTracking.fab.setImageResource(R.drawable.ic_stop)
                     binding.btnStop.isVisible = true
-                    sendCommandToService(Constants.ACTION_PAUSE_SERVICE)
+                    sendCommandToService(Actions.ACTION_PAUSE_SERVICE)
                     viewModel.onStartRequestLocationUpdates()
                 }
                 TrackingState.FINISH -> {
-                    binding.btnTracking.setImageResource(R.drawable.ic_play)
+                    binding.btnTracking.fab.setImageResource(R.drawable.ic_play)
                     binding.btnStop.isVisible = true
-                    sendCommandToService(Constants.ACTION_STOP_SERVICE)
-                    unregisterReceiver(stopWatchReceiver)
+                    sendCommandToService(Actions.ACTION_STOP_SERVICE)
                     viewModel.onStopRequestLocationUpdates()
                 }
                 else -> Unit
             }
         }
-        viewModel.action.observe(viewLifecycleOwner) {
+        viewModel.event.observe(viewLifecycleOwner) {
             when (it ?: return@observe) {
-                TrackingViewModel.Action.WARNING_EXIT_SESSION -> {
+                TrackingViewModel.Event.WARNING_EXIT_SESSION -> {
                     BaseDialogFragment.Builder().apply {
                         messageResId = R.string.msg_save_session_warning
                         negativeButtonResId = R.string.got_it
                     }
                         .show(childFragmentManager)
                 }
-                TrackingViewModel.Action.CONFIRM_SAVE_SESSION -> {
+                TrackingViewModel.Event.CONFIRM_SAVE_SESSION -> {
                     BaseDialogFragment.Builder().apply {
                         onClick = { event ->
                             if (event == BaseDialogFragment.Event.POSITIVE) {
@@ -245,44 +236,42 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                     }
                         .show(childFragmentManager)
                 }
-                TrackingViewModel.Action.CLOSE_SESSION -> requireActivity().finish()
+                TrackingViewModel.Event.CLOSE_SESSION -> requireActivity().finish()
             }
         }
     }
 
     private fun showSessionData(session: SessionModel) {
-        pathPoints = session.polylines.toMutableList()
-        polylineHelper?.addLatestPolyline(pathPoints.last())
-        val startLocation = session.startLocation.toLatLng()
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, Constants.MAP_ZOOM))
-        val binding = binding ?: return
-        binding.tvTotalTime.text = TimeUtils.getFormattedStopWatchTime(session.timeInMillis)
-        binding.tvDistance.text = getString(R.string.distance_km_unit, session.distanceInKm)
-        binding.tvSpeed.text = getString(R.string.speed_kmh_unit, session.speedInKmph)
+        (binding ?: return).apply {
+            tvTotalTime.text = TimeUtils.getFormattedStopWatchTime(session.timeInMillis)
+            tvDistance.text = getString(R.string.distance_km_unit, session.distanceInKm)
+            tvSpeed.text = getString(R.string.speed_kmh_unit, session.speedInKmph)
+            tvTotalTime.text = TimeUtils.getFormattedStopWatchTime(session.timeInMillis)
+        }
     }
 
     private fun onTrackingReady(data: SessionModel) {
+        showSessionData(data)
         val startLocation = data.startLocation.toLatLng()
         map?.addMarker(MarkerOptions().position(startLocation))
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, Constants.MAP_ZOOM))
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, MapConfig.DEFAULT_ZOOM))
     }
 
     private fun onTracking(data: SessionModel) {
         showSessionData(data)
         pathPoints = data.polylines.toMutableList()
-        polylineHelper?.addLatestPolyline(pathPoints.last())
-        moveCameraToUser()
+        if (pathPoints.isNotEmpty() && pathPoints.last().isNotEmpty()) {
+            polylineHelper?.addLatestPolyline(pathPoints.last())
+            map?.animateCamera(CameraUpdateFactory.newLatLng(pathPoints.last().last().toLatLng()))
+        }
     }
 
-    private fun moveCameraToUser() {
-        if (pathPoints.isNotEmpty() && pathPoints.last().isNotEmpty()) {
-            map?.animateCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    pathPoints.last().last().toLatLng(),
-                    currentZoomLevel
-                )
-            )
-        }
+    private fun onRestoreTracking(session: SessionModel) {
+        showSessionData(session)
+        pathPoints = session.polylines.toMutableList()
+        polylineHelper?.addAllPolylines(pathPoints)
+        val startLocation = session.startLocation.toLatLng()
+        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, MapConfig.DEFAULT_ZOOM))
     }
 
     private fun isLocationPermissionGranted(): Boolean {
