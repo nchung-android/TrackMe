@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.util
+package com.nchungdev.trackme.util
 
 import android.content.Context
 import android.content.ContextWrapper
@@ -15,7 +15,8 @@ import javax.inject.Inject
 
 class BitmapHandler @Inject constructor(
     private val context: Context,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher
+    @IoDispatcher
+    private val dispatcher: CoroutineDispatcher
 ) {
 
     suspend fun save(bitmap: Bitmap?, id: Int): Uri {

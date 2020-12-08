@@ -2,7 +2,7 @@ package com.nchungdev.trackme.ui.tracking
 
 import com.nchungdev.domain.usecase.session.GetLatestSessionUseCase
 import com.nchungdev.trackme.di.ActivityScope
-import com.nchungdev.trackme.ui.util.BitmapHandler
+import com.nchungdev.trackme.util.BitmapHandler
 import dagger.Subcomponent
 
 @ActivityScope

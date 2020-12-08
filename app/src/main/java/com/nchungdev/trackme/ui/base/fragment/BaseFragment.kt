@@ -1,27 +1,21 @@
 package com.nchungdev.trackme.ui.base.fragment
 
-import android.content.BroadcastReceiver
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
-import androidx.annotation.LayoutRes
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.viewbinding.ViewBinding
 
-abstract class BaseFragment : Fragment() {
+abstract class BaseFragment<B : ViewBinding> : Fragment() {
     private var layout: View? = null
 
+    private var binding: B? = null
+
     abstract fun injectDagger()
-
-    private val registerReceivers = HashSet<Int>()
-
-    @LayoutRes
-    abstract fun getLayoutResId(): Int
 
     @MenuRes
     protected open fun getMenuResId(): Int = 0
@@ -29,6 +23,7 @@ abstract class BaseFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         injectDagger()
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(getMenuResId() != 0)
     }
 
     override fun onCreateView(
@@ -38,8 +33,9 @@ abstract class BaseFragment : Fragment() {
     ): View? {
         when {
             layout == null -> {
-                layout = inflater.inflate(getLayoutResId(), container, false)
-                inits(layout as View, savedInstanceState)
+                binding = initViewBinding(inflater)
+                layout = binding?.root
+                onBindView(binding as B, savedInstanceState)
             }
             layout?.parent != null -> {
                 (layout?.parent as ViewGroup).removeView(layout)
@@ -48,9 +44,14 @@ abstract class BaseFragment : Fragment() {
         return layout
     }
 
-    protected open fun inits(view: View, savedInstanceState: Bundle?) = Unit
+    abstract fun initViewBinding(inflater: LayoutInflater): B
+
+    protected open fun onBindView(binding: B, savedInstanceState: Bundle?) = Unit
 
     override fun onDestroyView() {
+        if (binding != null) {
+            binding = null
+        }
         if (view != null) {
             val parentView = view?.parent
             if (parentView != null && parentView is ViewGroup) {
@@ -65,20 +66,6 @@ abstract class BaseFragment : Fragment() {
             inflater.inflate(getMenuResId(), menu)
         }
         super.onCreateOptionsMenu(menu, inflater)
-    }
-
-    protected fun registerReceiver(receiver: BroadcastReceiver, intentFilter: IntentFilter) {
-        if (!registerReceivers.contains(receiver.hashCode())) {
-            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(receiver, intentFilter)
-            registerReceivers.add(receiver.hashCode())
-        }
-    }
-
-    protected fun unregisterReceiver(receiver: BroadcastReceiver) {
-        if (registerReceivers.contains(receiver.hashCode())) {
-            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(receiver)
-            registerReceivers.remove(receiver.hashCode())
-        }
     }
 
     protected fun startService(intent: Intent) {

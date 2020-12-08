@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     app:cardCornerRadius="@dimen/item_radius">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -14,41 +14,69 @@
         <ImageView
             android:id="@+id/img_map_view"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="200dp"
             android:scaleType="centerCrop"
             tools:ignore="ContentDescription" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tv_distance"
+            style="@style/TrackMe.TextAppearance.Primary.Bold"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/img_map_view"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
             android:gravity="center"
-            android:orientation="horizontal"
-            android:padding="16dp">
+            android:text="@string/distance" />
 
-            <TextView
-                android:id="@+id/tv_distance"
-                style="@style/TrackMe.TextAppearance.Primary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center" />
+        <TextView
+            style="@style/TrackMe.TextAppearance.Primary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_distance"
+            android:layout_alignStart="@id/tv_distance"
+            android:layout_marginTop="@dimen/spacing_tiny"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:gravity="center"
+            android:text="@string/distance" />
 
-            <TextView
-                android:id="@+id/tv_avg_speed"
-                style="@style/TrackMe.TextAppearance.Primary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center" />
+        <TextView
+            android:id="@+id/tv_avg_speed"
+            style="@style/TrackMe.TextAppearance.Primary.Bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/tv_distance"
+            android:layout_centerHorizontal="true"
+            android:gravity="center" />
 
-            <TextView
-                android:id="@+id/tv_time"
-                style="@style/TrackMe.TextAppearance.Primary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center" />
-        </LinearLayout>
+        <TextView
+            style="@style/TrackMe.TextAppearance.Primary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_avg_speed"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/spacing_tiny"
+            android:gravity="center"
+            android:text="@string/avg_speed" />
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/tv_time"
+            style="@style/TrackMe.TextAppearance.Primary.Bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/tv_distance"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:gravity="center" />
+
+        <TextView
+            style="@style/TrackMe.TextAppearance.Primary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_time"
+            android:layout_alignEnd="@id/tv_time"
+            android:layout_marginTop="@dimen/spacing_tiny"
+            android:gravity="center"
+            android:text="@string/total_time" />
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>

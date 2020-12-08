@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <fraction name="dialog_min_width_minor">100%</fraction>
+    <fraction name="dialog_min_width_minor">90%</fraction>
 
     // spacing
     <dimen name="spacing_tiny">4dp</dimen>

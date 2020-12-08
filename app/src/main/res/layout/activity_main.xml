@@ -22,15 +22,15 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
         android:paddingBottom="?attr/actionBarSize"
-        app:defaultNavHost="true"
-        app:navGraph="@navigation/nav_graph" />
+        app:navGraph="@navigation/main"
+        tools:ignore="FragmentTagUsage" />
 
     <include layout="@layout/loading_view" />
 
@@ -44,6 +44,7 @@
         app:fabAlignmentMode="center"
         app:fabAnimationMode="slide"
         app:fabCradleMargin="8dp"
+        app:hideOnScroll="true"
         app:layout_scrollFlags="scroll|enterAlways">
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -51,15 +52,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bottom_nav_view_background"
-            app:menu="@menu/menu_navigation" />
+            app:menu="@menu/main" />
     </com.google.android.material.bottomappbar.BottomAppBar>
 
     <include
-        android:id="@+id/fab"
+        android:id="@+id/fab_layout"
         layout="@layout/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_anchor="@id/bottom_app_bar"
         app:layout_anchorGravity="end"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
         tools:ignore="ContentDescription" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

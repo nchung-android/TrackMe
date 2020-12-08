@@ -4,31 +4,28 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.view.isVisible
 import com.nchungdev.trackme.MainApp
-import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.ActivitySplashBinding
 import com.nchungdev.trackme.event.Event
-import com.nchungdev.trackme.ui.base.activity.BaseVBActivity
-import com.nchungdev.trackme.ui.util.Navigator
+import com.nchungdev.trackme.ui.base.activity.BaseVMActivity
+import com.nchungdev.trackme.util.Navigator
 
-class SplashActivity : BaseVBActivity<SplashViewModel, ActivitySplashBinding>() {
+class SplashActivity : BaseVMActivity<SplashViewModel, ActivitySplashBinding>() {
 
     override fun injectDagger() {
         MainApp.getAppComponent().splashComponent().create().inject(this)
     }
 
-    override fun getLayoutResId() = R.layout.activity_splash
-
     override fun initViewBinding() = ActivitySplashBinding.inflate(layoutInflater)
 
-    override fun inits(binding: ActivitySplashBinding, savedInstanceState: Bundle?) {
+    override fun onBind(binding: ActivitySplashBinding, savedInstanceState: Bundle?) {
         binding.loading.progress.isVisible = true
         subscribeToObservers()
-        viewModel.onReceiveIntent()
+        viewModel.onInit()
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        viewModel.onReceiveIntent()
+        viewModel.onInit()
     }
 
     private fun subscribeToObservers() {

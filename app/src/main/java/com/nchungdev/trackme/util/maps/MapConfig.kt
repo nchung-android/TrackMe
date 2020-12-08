@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.util
+package com.nchungdev.trackme.util.maps
 
 import android.annotation.SuppressLint
 import com.google.android.gms.maps.GoogleMap

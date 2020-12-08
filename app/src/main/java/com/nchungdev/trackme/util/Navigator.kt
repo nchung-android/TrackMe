@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.util
+package com.nchungdev.trackme.util
 
 import android.content.Context
 import android.content.Intent

@@ -2,6 +2,7 @@ package com.nchungdev.trackme.ui.tracking
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
@@ -26,11 +27,13 @@ import com.nchungdev.trackme.service.LocationService
 import com.nchungdev.trackme.ui.base.PermissionRequestable
 import com.nchungdev.trackme.ui.base.activity.BaseActivity
 import com.nchungdev.trackme.ui.base.dialog.BaseDialogFragment
-import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
-import com.nchungdev.trackme.ui.util.*
+import com.nchungdev.trackme.ui.base.fragment.BaseVMFragment
+import com.nchungdev.trackme.util.*
+import com.nchungdev.trackme.util.maps.MapConfig
+import com.nchungdev.trackme.util.maps.MapViewLifecycleManager
 import kotlinx.coroutines.*
 
-class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBinding>(),
+class TrackingFragment : BaseVMFragment<TrackingViewModel, FragmentTrackingBinding>(),
     OnMapReadyCallback,
     View.OnClickListener {
 
@@ -49,15 +52,14 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
 
     private var polylineHelper: PolylineHelper? = null
 
-    override fun getLayoutResId() = R.layout.fragment_tracking
-
     override fun injectDagger() {
         MainApp.getAppComponent().trackingComponent().create().inject(this)
     }
 
-    override fun initViewBinding(view: View) = FragmentTrackingBinding.bind(view)
+    override fun initViewBinding(inflater: LayoutInflater) =
+        FragmentTrackingBinding.inflate(inflater)
 
-    override fun inits(binding: FragmentTrackingBinding, savedInstanceState: Bundle?) {
+    override fun onBindView(binding: FragmentTrackingBinding, savedInstanceState: Bundle?) {
         this.binding = binding
         mapView = binding.mapView
         binding.btnTracking.fab.setOnClickListener(this)
@@ -66,7 +68,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         setDefaultData()
         subscribeToObservers()
         requestLocationPermissions()
-        viewModel.onInit(arguments)
+        viewModel.onInit(arguments, requireContext().isServiceRunning(LocationService::class.java))
     }
 
     private fun setDefaultData() {
@@ -127,6 +129,11 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        polylineHelper?.addAllPolylines(pathPoints)
+    }
+
     private fun setupMapView() {
         mapView.getMapAsync(this)
     }
@@ -137,7 +144,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
             viewModel.onLocationPermissionGranted()
         } else {
             PermissionUtils.requestLocationPermissions(
-                requireActivity() as BaseActivity,
+                requireActivity() as BaseActivity<*>,
                 object : PermissionRequestable.Callback {
                     override fun onRequestPermissionsResult(
                         requestCode: Int,
@@ -190,19 +197,19 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                 TrackingState.RUNNING -> {
                     binding.btnTracking.fab.setImageResource(R.drawable.ic_pause)
                     binding.btnStop.isVisible = false
-                    sendCommandToService(Actions.ACTION_START_SERVICE)
+                    sendCommandToService(Constants.ACTION_START_SERVICE)
                     viewModel.onStopRequestLocationUpdates()
                 }
                 TrackingState.PAUSE -> {
                     binding.btnTracking.fab.setImageResource(R.drawable.ic_stop)
                     binding.btnStop.isVisible = true
-                    sendCommandToService(Actions.ACTION_PAUSE_SERVICE)
+                    sendCommandToService(Constants.ACTION_PAUSE_SERVICE)
                     viewModel.onStartRequestLocationUpdates()
                 }
                 TrackingState.FINISH -> {
                     binding.btnTracking.fab.setImageResource(R.drawable.ic_play)
                     binding.btnStop.isVisible = true
-                    sendCommandToService(Actions.ACTION_STOP_SERVICE)
+                    sendCommandToService(Constants.ACTION_STOP_SERVICE)
                     viewModel.onStopRequestLocationUpdates()
                 }
                 else -> Unit
@@ -210,36 +217,40 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         }
         viewModel.event.observe(viewLifecycleOwner) {
             when (it ?: return@observe) {
-                TrackingViewModel.Event.WARNING_EXIT_SESSION -> {
+                TrackingViewModel.Event.WARNING_CLOSE_SESSION -> {
                     BaseDialogFragment.Builder().apply {
                         messageResId = R.string.msg_save_session_warning
                         negativeButtonResId = R.string.got_it
                     }
                         .show(childFragmentManager)
                 }
-                TrackingViewModel.Event.CONFIRM_SAVE_SESSION -> {
+                TrackingViewModel.Event.CONFIRM_CLOSE_SESSION -> {
                     BaseDialogFragment.Builder().apply {
                         onClick = { event ->
                             if (event == BaseDialogFragment.Event.POSITIVE) {
                                 map?.snapshot(viewModel::onSaveSession)
                             } else {
-                                viewModel.onCancelSession()
+                                viewModel.onCloseSession()
                             }
                         }
                         titleResId = R.string.title_save_session_confirmation
                         messageResId = R.string.msg_save_session_confirmation
-                        positiveButtonResId = R.string.finish
-                        negativeButtonResId = R.string.cancel
+                        positiveButtonResId = R.string.save_and_close_session
+                        negativeButtonResId = R.string.close_without_save_session
                     }
                         .show(childFragmentManager)
                 }
-                TrackingViewModel.Event.CLOSE_SESSION -> {
-                    requireActivity().apply {
-                        if (isTaskRoot) {
-                            Navigator.openMainActivity(this)
-                        }
-                        finish()
+                TrackingViewModel.Event.SAVE_AND_CLOSE -> requireActivity().apply {
+                    if (isTaskRoot) {
+                        Navigator.openMainActivity(this)
                     }
+                    finish()
+                }
+                TrackingViewModel.Event.CLOSE_WITHOUT_SAVE -> requireActivity().apply {
+                    if (isTaskRoot) {
+                        Navigator.openMainActivity(this)
+                    }
+                    finish()
                 }
             }
         }

@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.util
+package com.nchungdev.trackme.util
 
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.PolylineOptions
@@ -16,12 +16,12 @@ class PolylineHelper(private val map: GoogleMap, private val polylineOptions: Po
         map.addPolyline(polylineOptions)
     }
 
-    fun addAllPolylines(locationModels: List<List<LocationModel>>) {
-        locationModels.forEach { addPolyline(it) }
+    fun addAllPolylines(models: List<List<LocationModel>>) {
+        models.forEach { addPolyline(it) }
     }
 
-    private fun addPolyline(locationModels: List<LocationModel>) {
-        polylineOptions.addAll(locationModels.map { it.toLatLng() })
+    private fun addPolyline(models: List<LocationModel>) {
+        polylineOptions.addAll(models.map { it.toLatLng() })
         map.addPolyline(polylineOptions)
     }
 }

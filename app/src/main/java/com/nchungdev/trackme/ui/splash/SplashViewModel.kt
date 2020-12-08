@@ -19,11 +19,11 @@ class SplashViewModel @Inject constructor(
 
     val navigation: LiveData<Event> = _navigation
 
-    fun onReceiveIntent() {
+    fun onInit() {
         viewModelScope.launch {
             when (getLatestSessionAsyncUseCase(UseCase.NoParams)) {
-                is Result.Success -> _navigation.value = Event.TRACKING
-                else -> _navigation.value = Event.HOME
+                is Result.Success -> _navigation.postValue(Event.TRACKING)
+                else -> _navigation.postValue(Event.HOME)
             }
         }
     }

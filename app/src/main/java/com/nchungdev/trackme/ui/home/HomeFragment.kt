@@ -3,6 +3,7 @@ package com.nchungdev.trackme.ui.home
 import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,24 +12,22 @@ import com.bumptech.glide.Glide
 import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.domain.util.Result
 import com.nchungdev.trackme.MainApp
-import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.FragmentHomeBinding
-import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
+import com.nchungdev.trackme.ui.base.fragment.BaseVMFragment
 import com.nchungdev.trackme.ui.base.rv.BaseItemDecoration
 import com.nchungdev.trackme.ui.home.rv.HomeAdapter
-import com.nchungdev.trackme.ui.util.Navigator
+import com.nchungdev.trackme.util.Navigator
 
-class HomeFragment : BaseVBFragment<HomeViewModel, FragmentHomeBinding>() {
-    override fun getLayoutResId() = R.layout.fragment_home
+class HomeFragment : BaseVMFragment<HomeViewModel, FragmentHomeBinding>() {
 
     override fun injectDagger() {
         MainApp.getAppComponent().homeComponent().create().inject(this)
     }
 
-    override fun initViewBinding(view: View) = FragmentHomeBinding.bind(view)
+    override fun initViewBinding(inflater: LayoutInflater) = FragmentHomeBinding.inflate(inflater)
 
-    override fun inits(binding: FragmentHomeBinding, savedInstanceState: Bundle?) {
-        super.inits(binding, savedInstanceState)
+    override fun onBindView(binding: FragmentHomeBinding, savedInstanceState: Bundle?) {
+        super.onBindView(binding, savedInstanceState)
         val rv = binding.content.recyclerView.apply {
             layoutManager =
                 LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)

@@ -11,7 +11,7 @@ import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.notification.NotificationModel
 import com.nchungdev.trackme.notification.NotificationUtil
-import com.nchungdev.trackme.ui.util.Actions
+import com.nchungdev.trackme.util.Constants
 import javax.inject.Inject
 
 class LocationService : LifecycleService() {
@@ -52,9 +52,9 @@ class LocationService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
             when (it.action) {
-                Actions.ACTION_START_SERVICE -> startTracking()
-                Actions.ACTION_PAUSE_SERVICE -> pauseTracking()
-                Actions.ACTION_STOP_SERVICE -> stopTracking()
+                Constants.ACTION_START_SERVICE -> startTracking()
+                Constants.ACTION_PAUSE_SERVICE -> pauseTracking()
+                Constants.ACTION_STOP_SERVICE -> stopTracking()
             }
         }
         return super.onStartCommand(intent, flags, startId)

@@ -17,8 +17,6 @@
     </style>
 
     <style name="TrackMe.Theme.MaterialDialog" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:background">@drawable/bg_dialog</item>
-        <item name="android:windowMinWidthMajor">55%</item>
         <item name="android:windowMinWidthMinor">@fraction/dialog_min_width_minor</item>
         <item name="android:colorAccent">@color/colorAccent</item>
     </style>
