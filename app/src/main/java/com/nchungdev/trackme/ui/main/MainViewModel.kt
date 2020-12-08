@@ -3,24 +3,24 @@ package com.nchungdev.trackme.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.nchungdev.trackme.event.Screen
+import com.nchungdev.trackme.event.Event
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor() : ViewModel() {
 
-    private val _navigation = MutableLiveData<Screen>()
+    private val _navigation = MutableLiveData<Event>()
 
-    val navigation: LiveData<Screen> = _navigation
+    val navigation: LiveData<Event> = _navigation
 
     fun onOpenHomeScreen() {
-        _navigation.value = Screen(Screen.Event.HOME)
+        _navigation.value = Event.HOME
     }
 
     fun onOpenTrackingScreen() {
-        _navigation.value = Screen(Screen.Event.TRACKING)
+        _navigation.value = Event.TRACKING
     }
 
     fun onOpenAboutScreen() {
-        _navigation.value = Screen(Screen.Event.ABOUT)
+        _navigation.value = Event.ABOUT
     }
 }

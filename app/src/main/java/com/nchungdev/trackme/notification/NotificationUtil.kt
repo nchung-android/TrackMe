@@ -9,29 +9,36 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.app.TaskStackBuilder
 import com.nchungdev.data.util.Util
 import com.nchungdev.trackme.R
+import com.nchungdev.trackme.ui.main.MainActivity
 import com.nchungdev.trackme.ui.tracking.TrackingActivity
+
 
 object NotificationUtil {
     const val NOTIFICATION_ID = 1
     private const val NOTIFICATION_TRACKING_CHANNEL_ID = "tracking_channel"
     private const val NOTIFICATION_TRACKING_CHANNEL_NAME = "Tracking"
 
-    private fun createPendingIntent(context: Context) = PendingIntent.getActivity(
-        context,
-        0,
-        Intent(context, TrackingActivity::class.java),
-        PendingIntent.FLAG_UPDATE_CURRENT
-    )
+    private fun createPendingIntent(context: Context): PendingIntent? {
+        val intent = Intent(context, MainActivity::class.java)
+        val stackBuilder = TaskStackBuilder.create(context)
+        stackBuilder.addParentStack(MainActivity::class.java)
+        stackBuilder.addNextIntent(intent)
+        stackBuilder.addNextIntent(Intent(context, TrackingActivity::class.java))
+        return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun createChannel(context: Context) {
-        getNotificationManager(context)?.createNotificationChannel(NotificationChannel(
-            NOTIFICATION_TRACKING_CHANNEL_ID,
-            NOTIFICATION_TRACKING_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_LOW
-        ))
+        getNotificationManager(context)?.createNotificationChannel(
+            NotificationChannel(
+                NOTIFICATION_TRACKING_CHANNEL_ID,
+                NOTIFICATION_TRACKING_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_LOW
+            )
+        )
     }
 
     private fun createNotification(
@@ -51,8 +58,10 @@ object NotificationUtil {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
 
     fun updateStopWatch(context: Context, notificationModel: NotificationModel) {
-        getNotificationManager(context)?.notify(NOTIFICATION_ID,
-            makeNotification(context, notificationModel))
+        getNotificationManager(context)?.notify(
+            NOTIFICATION_ID,
+            makeNotification(context, notificationModel)
+        )
     }
 
     fun makeNotification(context: Context, notificationModel: NotificationModel): Notification {

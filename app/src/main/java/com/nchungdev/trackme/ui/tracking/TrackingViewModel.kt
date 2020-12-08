@@ -1,7 +1,6 @@
 package com.nchungdev.trackme.ui.tracking
 
 import android.graphics.Bitmap
-import android.os.Bundle
 import androidx.lifecycle.*
 import com.nchungdev.data.entity.SessionState
 import com.nchungdev.domain.model.LocationModel
@@ -41,15 +40,10 @@ class TrackingViewModel @Inject constructor(
 
     val event: LiveData<Event> = _event
 
-    fun onInit(arguments: Bundle?, isServiceRunning: Boolean) {
-        val session = arguments?.getParcelable<SessionModel>(TrackingFragment.EXTRA_SESSION)
-        if (session != null) {
-            val trackingState =
-                if (isServiceRunning && session.state == SessionState.RUNNING) TrackingState.RUNNING
-                else TrackingState.PAUSE
-            _trackingState.postValue(trackingState)
-            _session.postValue(Result.Success(session))
-        }
+    private var isFirstRun = true
+
+    fun onInit() {
+        isFirstRun = true
     }
 
     fun onLocationPermissionGranted() {
@@ -60,7 +54,15 @@ class TrackingViewModel @Inject constructor(
             }
         }
         _session.addSource(getLatestSessionUseCase(UseCase.NoParams)) {
-            if (trackingState.value == TrackingState.RUNNING) {
+            if (isFirstRun && it is Result.Success) {
+                if (it.data.state == SessionState.RUNNING) {
+                    _trackingState.postValue(TrackingState.RUNNING)
+                } else {
+                    _trackingState.postValue(TrackingState.PAUSE)
+                }
+                _session.postValue(it)
+                isFirstRun = false
+            } else if (trackingState.value == TrackingState.RUNNING) {
                 _session.postValue(it)
             }
         }
