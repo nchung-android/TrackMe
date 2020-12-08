@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -70,10 +69,7 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
         subscribeToObservers()
         requestLocationPermissions()
         mapView.getMapAsync(this)
-        viewModel.onInit(
-            arguments,
-            context?.isMyServiceRunning(LocationService::class.java) == true
-        )
+        viewModel.onInit()
     }
 
     private fun setDefaultData() {
@@ -236,7 +232,14 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
                     }
                         .show(childFragmentManager)
                 }
-                TrackingViewModel.Event.CLOSE_SESSION -> requireActivity().finish()
+                TrackingViewModel.Event.CLOSE_SESSION -> {
+                    requireActivity().apply {
+                        if (isTaskRoot) {
+                            Navigator.openMainActivity(this)
+                        }
+                        finish()
+                    }
+                }
             }
         }
     }
@@ -280,13 +283,5 @@ class TrackingFragment : BaseVBFragment<TrackingViewModel, FragmentTrackingBindi
 
     override fun onBackPressed(): Boolean {
         return viewModel.onBackPressed() || super.onBackPressed()
-    }
-
-    companion object {
-        const val EXTRA_SESSION = "xSession"
-
-        fun newInstance(sessionModel: SessionModel?) = TrackingFragment().apply {
-            arguments = bundleOf(EXTRA_SESSION to sessionModel)
-        }
     }
 }

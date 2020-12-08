@@ -7,7 +7,6 @@ import com.nchungdev.trackme.ui.detail.DetailActivity
 import com.nchungdev.trackme.ui.detail.DetailFragment.Companion.EXTRA_SESSION
 import com.nchungdev.trackme.ui.main.MainActivity
 import com.nchungdev.trackme.ui.tracking.TrackingActivity
-import com.nchungdev.trackme.ui.tracking.TrackingFragment
 
 object Navigator {
 
@@ -15,10 +14,8 @@ object Navigator {
         context.startActivity(Intent(context, MainActivity::class.java))
     }
 
-    fun openTrackingActivity(context: Context, sessionModel: SessionModel? = null) {
-        context.startActivity(Intent(context, TrackingActivity::class.java).apply {
-            putExtra(TrackingFragment.EXTRA_SESSION, sessionModel)
-        })
+    fun openTrackingActivity(context: Context) {
+        context.startActivity(Intent(context, TrackingActivity::class.java))
     }
 
     fun openSessionDetails(context: Context, sessionModel: SessionModel) {

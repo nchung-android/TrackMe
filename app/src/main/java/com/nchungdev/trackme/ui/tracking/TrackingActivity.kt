@@ -4,5 +4,5 @@ import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.trackme.ui.base.activity.SimpleActivity
 
 class TrackingActivity : SimpleActivity<TrackingFragment>() {
-    override fun makeFragment() = TrackingFragment.newInstance(intent.getParcelableExtra<SessionModel>(TrackingFragment.EXTRA_SESSION))
+    override fun makeFragment() = TrackingFragment()
 }

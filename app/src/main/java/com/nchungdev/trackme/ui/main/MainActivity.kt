@@ -1,20 +1,16 @@
 package com.nchungdev.trackme.ui.main
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.ActivityMainBinding
-import com.nchungdev.trackme.event.Screen
-import com.nchungdev.trackme.service.LocationService
+import com.nchungdev.trackme.event.Event
 import com.nchungdev.trackme.ui.base.activity.BaseVBActivity
 import com.nchungdev.trackme.ui.util.Navigator
 import com.nchungdev.trackme.ui.util.findNavHostFragment
-import com.nchungdev.trackme.ui.util.isMyServiceRunning
 
 class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>() {
 
@@ -56,15 +52,10 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>() {
     private fun subscribeToObservers() {
         val navController = supportFragmentManager.findNavHostFragment(R.id.nav_host_fragment)
         viewModel.navigation.observe(this) {
-            when (it.event) {
-                Screen.Event.HOME -> navController.navigate(R.id.homeFragment)
-                Screen.Event.ABOUT -> navController.navigate(R.id.aboutFragment)
-                Screen.Event.TRACKING -> {
-                    Navigator.openTrackingActivity(
-                        this,
-                        if (it.data is SessionModel) it.data else null
-                    )
-                }
+            when (it) {
+                Event.HOME -> navController.navigate(R.id.homeFragment)
+                Event.ABOUT -> navController.navigate(R.id.aboutFragment)
+                Event.TRACKING -> Navigator.openTrackingActivity(this)
                 else -> Unit
             }
         }
