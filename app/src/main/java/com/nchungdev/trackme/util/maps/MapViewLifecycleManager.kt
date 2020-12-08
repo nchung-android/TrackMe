@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.util
+package com.nchungdev.trackme.util.maps
 
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
@@ -8,7 +8,7 @@ import com.google.android.gms.maps.MapView
 
 class MapViewLifecycleManager(
     private val mapView: MapView?,
-    private val savedInstanceState: Bundle?
+    private val savedInstanceState: Bundle?,
 ) :
     LifecycleObserver {
 

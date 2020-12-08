@@ -1,12 +1,12 @@
 package com.nchungdev.trackme.ui.about
 
-import com.nchungdev.trackme.R
+import android.view.LayoutInflater
+import com.nchungdev.trackme.databinding.FragmentAboutBinding
 import com.nchungdev.trackme.ui.base.fragment.BaseFragment
 
-class AboutFragment : BaseFragment() {
-    override fun getLayoutResId() = R.layout.fragment_about
+class AboutFragment : BaseFragment<FragmentAboutBinding>() {
 
-    override fun injectDagger() {
+    override fun injectDagger() = Unit
 
-    }
+    override fun initViewBinding(inflater: LayoutInflater) = FragmentAboutBinding.inflate(inflater)
 }

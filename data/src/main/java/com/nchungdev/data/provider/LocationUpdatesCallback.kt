@@ -70,7 +70,12 @@ class LocationUpdatesCallback @Inject constructor(
                     polylines = lastTrackingModel.polylines
                     distanceInKm = lastTrackingModel.distanceInKm
                     speedInKmph = lastTrackingModel.speedInKmph
-                    avgSpeedInKmph = SpeedUtil.calcSpeed(distanceInKm, timeInMillis)
+                    avgSpeedInKmph =
+                        if (distanceInKm == null || timeInMillis == null || timeInMillis == 0L) {
+                            0F
+                        } else {
+                            SpeedUtil.calcSpeed(distanceInKm, timeInMillis)
+                        }
                 }
                 sessionDAO.update(sessionEntity)
             }

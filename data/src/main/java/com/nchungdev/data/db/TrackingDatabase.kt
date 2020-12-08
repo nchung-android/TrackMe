@@ -12,7 +12,7 @@ import com.nchungdev.data.entity.SessionEntity
 
 @Database(
     entities = [SessionEntity::class, LocationEntity::class],
-    version = 15
+    version = 16
 )
 @TypeConverters(value = [Converters::class])
 abstract class TrackingDatabase : RoomDatabase() {

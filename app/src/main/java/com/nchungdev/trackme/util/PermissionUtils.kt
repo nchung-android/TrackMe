@@ -1,4 +1,4 @@
-package com.nchungdev.trackme.ui.util
+package com.nchungdev.trackme.util
 
 import android.Manifest
 import android.content.Context
@@ -28,8 +28,8 @@ object PermissionUtils {
     fun isLocationPermissionGranted(activity: Context) =
         checkPermissions(activity, permissionsRequested).isEmpty()
 
-    fun requestLocationPermissions(activity: BaseActivity, requestable: PermissionRequestable.Callback) {
-        activity.requestPermissions(permissionsRequested, requestable)
+    fun requestLocationPermissions(activity: BaseActivity<*>, callback: PermissionRequestable.Callback) {
+        activity.requestPermissions(permissionsRequested, callback)
     }
 
     fun checkPermissions(activity: Context, permissions: Array<String>): Array<String> {

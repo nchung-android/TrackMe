@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
-import com.nchungdev.trackme.R
+import com.nchungdev.trackme.databinding.DialogFragmentBinding
 
 open class BaseDialogFragment : AppCompatDialogFragment() {
     private var onClickListener: (Event) -> Unit = {}
@@ -23,17 +23,18 @@ open class BaseDialogFragment : AppCompatDialogFragment() {
         val message = getStringFromArgument("message", "messageResId")
         val positive = getStringFromArgument("positive", "positiveResId")
         val negative = getStringFromArgument("negative", "negativeResId")
-        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_fragment, null)
-        setText(layout.findViewById(R.id.tv_title), title)
-        setText(layout.findViewById(R.id.tv_message), message)
-        layout.findViewById<TextView>(R.id.btn_positive).apply {
+
+        val binding = DialogFragmentBinding.inflate(LayoutInflater.from(requireContext()))
+        setText(binding.tvTitle, title)
+        setText(binding.tvMessage, message)
+        binding.btnPositive.apply {
             setText(this, positive)
             setOnClickListener {
                 onClickListener(Event.POSITIVE)
                 dismiss()
             }
         }
-        layout.findViewById<TextView>(R.id.btn_negative).apply {
+        binding.btnNegative.apply {
             setText(this, negative)
             setOnClickListener {
                 onClickListener(Event.NEGATIVE)
@@ -42,7 +43,7 @@ open class BaseDialogFragment : AppCompatDialogFragment() {
         }
         return AppCompatDialog(requireActivity()).apply {
             supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
-            setContentView(layout)
+            setContentView(binding.root)
         }
     }
 

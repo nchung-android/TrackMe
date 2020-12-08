@@ -1,7 +1,7 @@
 package com.nchungdev.trackme.ui.detail
 
 import android.os.Bundle
-import android.view.View
+import android.view.LayoutInflater
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -16,12 +16,12 @@ import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.trackme.MainApp
 import com.nchungdev.trackme.R
 import com.nchungdev.trackme.databinding.FragmentDetailBinding
-import com.nchungdev.trackme.ui.base.fragment.BaseVBFragment
-import com.nchungdev.trackme.ui.util.MapConfig
-import com.nchungdev.trackme.ui.util.MapViewLifecycleManager
-import com.nchungdev.trackme.ui.util.PolylineHelper
+import com.nchungdev.trackme.ui.base.fragment.BaseVMFragment
+import com.nchungdev.trackme.util.maps.MapConfig
+import com.nchungdev.trackme.util.maps.MapViewLifecycleManager
+import com.nchungdev.trackme.util.PolylineHelper
 
-class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(), OnMapReadyCallback {
+class DetailFragment : BaseVMFragment<DetailViewModel, FragmentDetailBinding>(), OnMapReadyCallback {
     private lateinit var mapView: MapView
     private var map: GoogleMap? = null
 
@@ -34,18 +34,14 @@ class DetailFragment : BaseVBFragment<DetailViewModel, FragmentDetailBinding>(),
 
     private var polylineHelper: PolylineHelper? = null
 
-    override fun initViewBinding(view: View): FragmentDetailBinding {
-        return FragmentDetailBinding.bind(view)
-    }
+    override fun initViewBinding(inflater: LayoutInflater) = FragmentDetailBinding.inflate(inflater)
 
     override fun injectDagger() {
         MainApp.getAppComponent().detailComponent().create().inject(this)
     }
 
-    override fun getLayoutResId(): Int = R.layout.fragment_detail
-
-    override fun inits(binding: FragmentDetailBinding, savedInstanceState: Bundle?) {
-        super.inits(binding, savedInstanceState)
+    override fun onBindView(binding: FragmentDetailBinding, savedInstanceState: Bundle?) {
+        super.onBindView(binding, savedInstanceState)
         mapView = binding.mapView
         lifecycle.addObserver(MapViewLifecycleManager(binding.mapView, savedInstanceState))
         mapView.getMapAsync(this)

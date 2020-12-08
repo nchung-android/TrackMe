@@ -14,7 +14,7 @@ import com.nchungdev.domain.usecase.session.DeleteSessionUseCase
 import com.nchungdev.domain.usecase.session.GetLatestSessionUseCase
 import com.nchungdev.domain.usecase.session.UpdateSessionUseCase
 import com.nchungdev.domain.util.Result
-import com.nchungdev.trackme.ui.util.BitmapHandler
+import com.nchungdev.trackme.util.BitmapHandler
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,12 +41,15 @@ class TrackingViewModel @Inject constructor(
 
     val event: LiveData<Event> = _event
 
-    private var shouldRestore = false
+    private val savedState = RestoreState()
 
-    fun onInit(data: Bundle?) {
+    data class RestoreState(var restore: Boolean = false, var serviceRunning: Boolean = false)
+
+    fun onInit(data: Bundle?, serviceRunning: Boolean) {
         val isFromNotif = data?.getBoolean(TrackingFragment.EXTRA_OPEN_FROM_NOTIF, false)
         val isFromNewIntent = data?.getBoolean(TrackingFragment.EXTRA_OPEN_FROM_SPLASH, false)
-        shouldRestore = isFromNotif == true || isFromNewIntent == true
+        savedState.restore = isFromNotif == true || isFromNewIntent == true
+        savedState.serviceRunning = serviceRunning
     }
 
     fun onLocationPermissionGranted() {
@@ -56,16 +59,15 @@ class TrackingViewModel @Inject constructor(
                 _currentLocation.postValue(it)
             }
         }
-        _currentLocation.postValue(Result.Success(LocationModel(10.768484668348659, 106.66023725668128)))
         _session.addSource(getLatestSessionUseCase(UseCase.NoParams)) {
-            if (shouldRestore && it is Result.Success) {
-                if (it.data.state == SessionState.RUNNING) {
+            if (savedState.restore && it is Result.Success) {
+                if (it.data.state == SessionState.RUNNING && savedState.serviceRunning) {
                     _trackingState.postValue(TrackingState.RUNNING)
                 } else {
                     _trackingState.postValue(TrackingState.PAUSE)
                 }
                 _session.postValue(it)
-                shouldRestore = false
+                savedState.restore = false
             } else if (trackingState.value == TrackingState.RUNNING) {
                 _session.postValue(it)
             }
@@ -78,7 +80,7 @@ class TrackingViewModel @Inject constructor(
                 viewModelScope.launch {
                     when (createSessionUseCase(CreateSessionUseCase.Params(SessionState.RUNNING))) {
                         is Result.Success -> _trackingState.postValue(TrackingState.RUNNING)
-                        is Result.Error -> _event.postValue(Event.CLOSE_SESSION)
+                        is Result.Error -> _event.postValue(Event.SAVE_AND_CLOSE)
                         else -> Unit
                     }
                 }
@@ -91,7 +93,7 @@ class TrackingViewModel @Inject constructor(
                     _trackingState.postValue(TrackingState.PAUSE)
                 }
             }
-            TrackingState.PAUSE -> _event.postValue(Event.CONFIRM_SAVE_SESSION)
+            TrackingState.PAUSE -> _event.postValue(Event.CONFIRM_CLOSE_SESSION)
             else -> Unit
         }
     }
@@ -112,7 +114,7 @@ class TrackingViewModel @Inject constructor(
         TrackingState.RUNNING,
         TrackingState.PAUSE,
         -> {
-            _event.postValue(Event.WARNING_EXIT_SESSION)
+            _event.postValue(Event.WARNING_CLOSE_SESSION)
             true
         }
         else -> false
@@ -126,7 +128,7 @@ class TrackingViewModel @Inject constructor(
             when (updateSessionUseCase(UpdateSessionUseCase.Params(session))) {
                 is Result.Success -> {
                     _trackingState.postValue(TrackingState.FINISH)
-                    _event.postValue(Event.CLOSE_SESSION)
+                    _event.postValue(Event.SAVE_AND_CLOSE)
                 }
                 is Result.Error -> Unit
                 Result.Loading -> Unit
@@ -134,13 +136,13 @@ class TrackingViewModel @Inject constructor(
         }
     }
 
-    fun onCancelSession() {
+    fun onCloseSession() {
         val session = getSession() ?: return
         viewModelScope.launch {
             when (deleteSessionUseCase(DeleteSessionUseCase.Params(session))) {
                 is Result.Success -> {
                     _trackingState.postValue(TrackingState.FINISH)
-                    _event.postValue(Event.CLOSE_SESSION)
+                    _event.postValue(Event.CLOSE_WITHOUT_SAVE)
                 }
                 is Result.Error -> Unit
                 Result.Loading -> Unit
@@ -170,8 +172,9 @@ class TrackingViewModel @Inject constructor(
     }
 
     enum class Event {
-        WARNING_EXIT_SESSION,
-        CONFIRM_SAVE_SESSION,
-        CLOSE_SESSION,
+        WARNING_CLOSE_SESSION,
+        CONFIRM_CLOSE_SESSION,
+        SAVE_AND_CLOSE,
+        CLOSE_WITHOUT_SAVE
     }
 }
