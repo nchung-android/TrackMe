@@ -11,8 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.nchungdev.data.util.Util
 import com.nchungdev.trackme.R
-import com.nchungdev.trackme.ui.main.MainActivity
-import com.nchungdev.trackme.ui.util.Actions
+import com.nchungdev.trackme.ui.tracking.TrackingActivity
 
 object NotificationUtil {
     const val NOTIFICATION_ID = 1
@@ -22,9 +21,7 @@ object NotificationUtil {
     private fun createPendingIntent(context: Context) = PendingIntent.getActivity(
         context,
         0,
-        Intent(context, MainActivity::class.java).also {
-            it.action = Actions.ACTION_SHOW_TRACKING_FRAGMENT
-        },
+        Intent(context, TrackingActivity::class.java),
         PendingIntent.FLAG_UPDATE_CURRENT
     )
 
@@ -37,7 +34,10 @@ object NotificationUtil {
         ))
     }
 
-    private fun createNotification(context: Context, notificationModel: NotificationModel): Notification =
+    private fun createNotification(
+        context: Context,
+        notificationModel: NotificationModel,
+    ): Notification =
         NotificationCompat.Builder(context, NOTIFICATION_TRACKING_CHANNEL_ID)
             .setAutoCancel(false)
             .setOngoing(true)
@@ -51,7 +51,8 @@ object NotificationUtil {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
 
     fun updateStopWatch(context: Context, notificationModel: NotificationModel) {
-        getNotificationManager(context)?.notify(NOTIFICATION_ID, makeNotification(context, notificationModel))
+        getNotificationManager(context)?.notify(NOTIFICATION_ID,
+            makeNotification(context, notificationModel))
     }
 
     fun makeNotification(context: Context, notificationModel: NotificationModel): Notification {

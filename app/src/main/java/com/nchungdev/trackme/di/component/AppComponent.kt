@@ -12,6 +12,7 @@ import com.nchungdev.trackme.service.LocationComponent
 import com.nchungdev.trackme.ui.detail.DetailComponent
 import com.nchungdev.trackme.ui.home.HomeComponent
 import com.nchungdev.trackme.ui.main.MainComponent
+import com.nchungdev.trackme.ui.splash.SplashComponent
 import com.nchungdev.trackme.ui.tracking.TrackingComponent
 import dagger.BindsInstance
 import dagger.Component
@@ -29,6 +30,7 @@ interface AppComponent {
     }
 
     // Types that can be retrieved from the graph
+    fun splashComponent(): SplashComponent.Factory
     fun mainComponent(): MainComponent.Factory
     fun trackingComponent(): TrackingComponent.Factory
     fun locationServiceComponent(): LocationComponent.Factory

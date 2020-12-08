@@ -8,6 +8,7 @@
     tools:context=".ui.main.MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -30,6 +31,8 @@
         android:paddingBottom="?attr/actionBarSize"
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
+
+    <include layout="@layout/loading_view" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottom_app_bar"

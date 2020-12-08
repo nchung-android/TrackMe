@@ -5,10 +5,15 @@ import android.content.Intent
 import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.trackme.ui.detail.DetailActivity
 import com.nchungdev.trackme.ui.detail.DetailFragment.Companion.EXTRA_SESSION
+import com.nchungdev.trackme.ui.main.MainActivity
 import com.nchungdev.trackme.ui.tracking.TrackingActivity
 import com.nchungdev.trackme.ui.tracking.TrackingFragment
 
 object Navigator {
+
+    fun openMainActivity(context: Context) {
+        context.startActivity(Intent(context, MainActivity::class.java))
+    }
 
     fun openTrackingActivity(context: Context, sessionModel: SessionModel? = null) {
         context.startActivity(Intent(context, TrackingActivity::class.java).apply {

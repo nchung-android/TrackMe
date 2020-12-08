@@ -29,16 +29,6 @@ class MainActivity : BaseVBActivity<MainViewModel, ActivityMainBinding>() {
     override fun inits(binding: ActivityMainBinding, savedInstanceState: Bundle?) {
         subscribeToObservers()
         setupNavigation(binding)
-        if (isMyServiceRunning(LocationService::class.java)) {
-            viewModel.onRestoreTracking()
-        } else {
-            viewModel.onReceiveIntent(intent)
-        }
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        viewModel.onReceiveIntent(intent)
     }
 
     private fun setupNavigation(binding: ActivityMainBinding) {

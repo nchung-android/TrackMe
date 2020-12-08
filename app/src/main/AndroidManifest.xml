@@ -27,14 +27,18 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".ui.main.MainActivity"
-            android:theme="@style/TrackMe.Theme.NoActionBar">
+            android:name=".ui.splash.SplashActivity"
+            android:theme="@style/TrackMe.Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:theme="@style/TrackMe.Theme.NoActionBar" />
 
         <activity
             android:name=".ui.tracking.TrackingActivity"

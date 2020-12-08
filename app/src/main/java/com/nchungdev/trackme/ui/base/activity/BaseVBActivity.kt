@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 abstract class BaseVBActivity<VM : ViewModel, B : ViewBinding> : BaseActivity() {
     @Inject
-    lateinit var viewModel: MainViewModel
+    lateinit var viewModel: VM
 
     private var binding: B? = null
 

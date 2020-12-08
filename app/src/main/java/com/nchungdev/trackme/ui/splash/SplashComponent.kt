@@ -1,15 +1,15 @@
-package com.nchungdev.trackme.ui.main
+package com.nchungdev.trackme.ui.splash
 
 import com.nchungdev.trackme.di.ActivityScope
 import dagger.Subcomponent
 
 @ActivityScope
 @Subcomponent
-interface MainComponent {
+interface SplashComponent {
     @Subcomponent.Factory
     interface Factory {
-        fun create(): MainComponent
+        fun create(): SplashComponent
     }
 
-    fun inject(mainActivity: MainActivity)
+    fun inject(splashActivity: SplashActivity)
 }

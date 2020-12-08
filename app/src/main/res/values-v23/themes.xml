@@ -17,4 +17,10 @@
         <item name="tcDialogButtonPrimary">@color/textDialogButtonPrimary</item>
         <item name="tcDialogButtonSecondary">@color/textDialogButtonSecondary</item>
     </style>
+
+    <style name="TrackMe.Theme.Splash" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
 </resources>
