@@ -27,6 +27,7 @@ import com.nchungdev.trackme.service.LocationService
 import com.nchungdev.trackme.ui.base.PermissionRequestable
 import com.nchungdev.trackme.ui.base.activity.BaseActivity
 import com.nchungdev.trackme.ui.base.dialog.BaseDialogFragment
+import com.nchungdev.trackme.ui.base.dialog.ConfirmationDialogFragment
 import com.nchungdev.trackme.ui.base.fragment.BaseVMFragment
 import com.nchungdev.trackme.util.*
 import com.nchungdev.trackme.util.maps.MapConfig
@@ -218,16 +219,17 @@ class TrackingFragment : BaseVMFragment<TrackingViewModel, FragmentTrackingBindi
         viewModel.event.observe(viewLifecycleOwner) {
             when (it ?: return@observe) {
                 TrackingViewModel.Event.WARNING_CLOSE_SESSION -> {
-                    BaseDialogFragment.Builder().apply {
+                    val builder = BaseDialogFragment.Builder().apply {
                         messageResId = R.string.msg_save_session_warning
                         negativeButtonResId = R.string.got_it
                     }
+                    ConfirmationDialogFragment.newInstance(builder)
                         .show(childFragmentManager)
                 }
                 TrackingViewModel.Event.CONFIRM_CLOSE_SESSION -> {
-                    BaseDialogFragment.Builder().apply {
+                    val builder = BaseDialogFragment.Builder().apply {
                         onClick = { event ->
-                            if (event == BaseDialogFragment.Event.POSITIVE) {
+                            if (event == BaseDialogFragment.POSITIVE) {
                                 map?.snapshot(viewModel::onSaveSession)
                             } else {
                                 viewModel.onCloseSession()
@@ -238,6 +240,7 @@ class TrackingFragment : BaseVMFragment<TrackingViewModel, FragmentTrackingBindi
                         positiveButtonResId = R.string.save_and_close_session
                         negativeButtonResId = R.string.close_without_save_session
                     }
+                    ConfirmationDialogFragment.newInstance(builder)
                         .show(childFragmentManager)
                 }
                 TrackingViewModel.Event.SAVE_AND_CLOSE -> requireActivity().apply {
