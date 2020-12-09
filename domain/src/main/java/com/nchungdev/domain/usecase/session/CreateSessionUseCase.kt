@@ -1,6 +1,5 @@
 package com.nchungdev.domain.usecase.session
 
-import com.nchungdev.domain.model.SessionModel
 import com.nchungdev.domain.repository.SessionRepository
 import com.nchungdev.domain.usecase.base.UseCase
 import com.nchungdev.domain.util.IoDispatcher

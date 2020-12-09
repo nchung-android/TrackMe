@@ -1,5 +1,6 @@
 package com.nchungdev.trackme.ui.splash
 
+import com.nchungdev.domain.usecase.session.GetLatestSessionAsyncUseCase
 import com.nchungdev.trackme.di.ActivityScope
 import dagger.Subcomponent
 
@@ -12,4 +13,6 @@ interface SplashComponent {
     }
 
     fun inject(splashActivity: SplashActivity)
+
+    fun getLatestSessionAsyncUseCase(): GetLatestSessionAsyncUseCase
 }

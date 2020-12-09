@@ -1,5 +1,6 @@
 package com.nchungdev.trackme.ui.home
 
+import com.nchungdev.domain.usecase.session.GetAllSessionsUseCase
 import com.nchungdev.trackme.di.ActivityScope
 import dagger.Subcomponent
 
@@ -13,4 +14,5 @@ interface HomeComponent {
 
     fun inject(fragment: HomeFragment)
 
+    fun getAllSessionsUseCase(): GetAllSessionsUseCase
 }
